@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<android.support.design.widget.AppBarLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		style="@style/mToolBar">
+
+		<android.support.v7.widget.Toolbar
+			android:id="@+id/toolbar_normal"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			app:titleTextColor="#ffffff">
+
+			<ProgressBar
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:id="@+id/activity_main_waitingprogressbar"/>
+
+		</android.support.v7.widget.Toolbar>
+
+	</android.support.design.widget.AppBarLayout>
+
+	<android.support.v4.widget.DrawerLayout
+		android:id="@+id/activity_main_dl"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:layout_weight="1.0">
+
+		<FrameLayout
+			android:layout_height="match_parent"
+			android:layout_width="match_parent"
+			android:orientation="vertical"
+			android:id="@+id/activity_main_content"/>
+
+		<LinearLayout
+			android:layout_width="240dp"
+			android:layout_height="match_parent"
+			android:layout_gravity="start"
+			android:background="#FFFFFF">
+
+			<ListView
+				android:layout_height="wrap_content"
+				android:layout_width="match_parent"
+				android:id="@+id/activity_main_list"
+				android:choiceMode="singleChoice"/>
+
+		</LinearLayout>
+
+	</android.support.v4.widget.DrawerLayout>
+
+	<com.google.android.gms.ads.AdView
+		xmlns:ads="http://schemas.android.com/apk/res-auto"
+		android:id="@+id/adView"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		ads:adSize="BANNER"
+		ads:adUnitId="ca-app-pub-4267459436057308/4124674626">
+
+	</com.google.android.gms.ads.AdView>
+
+</LinearLayout>
+
