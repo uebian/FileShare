@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
+  <title>FileShare</title>
+  <link rel="stylesheet" href="./res/css/mdui.min.css"/>
+  <script src="./res/js/mdui.min.js"></script>
+  <!--<script src="./res/js/jquery-3.3.1.min.js"></script>-->
+</head>
+<body class="mdui-theme-primary-indigo mdui-theme-accent-pink mdui-appbar-with-toolbar">
+<!-- appbar -->
+<div class="mdui-appbar mdui-appbar-fixed">
+  <div class="mdui-toolbar mdui-color-theme">
+    <a class="mdui-typo-headline">FileShare----等待授权</a>
+      </div>
+</div>
+<div class="mdui-progress">
+  <div class="mdui-progress-indeterminate"></div>
+  </div>
+  <iframe src="./askpermission" style="display:none" onload="iframeLoad(this);"></iframe>
+  <script language="javascript">  
+function iframeLoad(iframe){   
+var doc = iframe.contentWindow.document;   
+var html = doc.body.innerHTML;
+//alert(html);
+if((html.indexOf("ok")!=-1) || (html.indexOf("no")!=-1))
+{
+  
+  if(html.indexOf("no")!=-1)
+  {
+  /*mdui.dialog(
+  {title: '提示', content: '用户拒绝', buttons: [ 
+  { text: '关于FileShare',onClick: function(inst){
+  location=."/res/html/about.html"}
+    }, { text: '关闭窗口', onClick: function(inst){
+    window.close() } 
+    } ] });*/
+  mdui.alert("用户拒绝",function(){window.close()});
+  }else{
+  location.reload();
+  }
+}
+//mdui.alert(html);
+}
+</script>
+</body>
+</html>

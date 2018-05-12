@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.preference.PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.preference.PreferenceCategory
+        android:title="服务器">
+
+        <android.support.v7.preference.EditTextPreference
+            android:key="serverport"
+            android:title="端口号(>1024)"
+            android:defaultValue="8080"/>
+		<android.support.v7.preference.SwitchPreferenceCompat
+			android:key="useroot"
+			android:title="使用root权限访问文件"
+			android:defaultValue="false"/>
+		<android.support.v7.preference.EditTextPreference
+            android:key="rootpath"
+            android:title="虚拟根目录"
+            android:defaultValue="/"/>
+    </android.support.v7.preference.PreferenceCategory>
+	<android.support.v7.preference.PreferenceCategory
+        android:title="安全">
+		<ListPreference 
+			android:key="authtype"
+			android:title="身份认证方式"
+			android:defaultValue="passwd"/>
+		<android.support.v7.preference.EditTextPreference
+            android:key="password"
+            android:title="密码"/>
+	</android.support.v7.preference.PreferenceCategory>
+</android.support.v7.preference.PreferenceScreen>
