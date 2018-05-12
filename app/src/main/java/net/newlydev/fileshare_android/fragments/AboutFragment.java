@@ -1,16 +1,11 @@
 package net.newlydev.fileshare_android.fragments;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.Switch;
-import net.newlydev.fileshare_android.MainService;
-import net.newlydev.fileshare_android.R;
-import net.newlydev.fileshare_android.Utils;
+import android.content.*;
+import android.net.*;
+import android.os.*;
+import android.support.v4.app.*;
+import android.view.*;
+import net.newlydev.fileshare_android.*;
 
 public class AboutFragment extends Fragment
 {
@@ -31,5 +26,10 @@ public class AboutFragment extends Fragment
 		super.onCreate(savedInstanceState);
 
 
+	}
+	public void sc(View v){
+		Uri uri = Uri.parse("https://github.com/uebian/fileshare");
+		Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+		startActivity(intent);
 	}
 }

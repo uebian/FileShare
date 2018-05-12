@@ -11,7 +11,7 @@ public class mFile
 	{
 		this.cmdline=cmdline;
 		this.path=path;
-		String tmps[]=cmdline.split(" ");
+		/*String tmps[]=cmdline.split(" ");
 		ArrayList<String> cs=new ArrayList<String>();
 		for(String tmp:tmps)
 		{
@@ -20,7 +20,27 @@ public class mFile
 				cs.add(tmp.trim());
 			}
 		}
-		filename=cs.get(cs.size()-1);
+		filename=cs.get(cs.size()-1);*/
+		boolean islast=false;
+		int count=0;
+		int js=0;
+		for(char c:cmdline.toCharArray())
+		{
+			if(c==' ' && islast==false)
+			{
+				count++;
+				islast=true;
+			}
+			if(c!=' ')
+			{
+				islast=false;
+			}
+			if(c!=' ' && count==7){
+				break;
+			}
+			js++;
+		}
+		filename=cmdline.substring(js);
 	}
 	public String getFileName()
 	{

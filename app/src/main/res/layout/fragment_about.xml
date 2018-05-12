@@ -30,15 +30,9 @@
 
 		<Button
 			android:layout_height="wrap_content"
-			android:layout_width="0dp"
-			android:text="源代码"
-			android:layout_weight="1.0"/>
-
-		<Button
-			android:layout_height="wrap_content"
-			android:layout_width="0dp"
-			android:text="捐赠"
-			android:layout_weight="1.0"/>
+			android:layout_width="match_parent"
+			android:text="源代码(需有效的网络连接)"
+			android:id="@+id/fragment_about_sourcecode_btn"/>
 
 	</LinearLayout>
 
