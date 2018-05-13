@@ -37,40 +37,50 @@ public class MainFragment extends Fragment
 	}
 	private void refreshQR() throws WriterException
 	{
-		String ip=Utils.getLocalIpAddress();
-		if (ip.equals("0"))
+		if (Utils.isMainServiceRunning(getActivity()))
 		{
-			ip_tv.setText("您的设备似乎没有有效的ipv4连接，请连接WiFi或打开WiFi热点后点本段文字重试\n我们暂不支持ipv6连接");
+			String ip=Utils.getLocalIpAddress();
+			if (ip.equals("0"))
+			{
+				ip_tv.setText("您的设备似乎没有有效的ipv4连接，请连接WiFi或打开WiFi热点后点本段文字重试\n我们暂不支持ipv6连接");
+				QRCode.setVisibility(View.GONE);
+			}
+			else
+			{
+				String url="http://" + ip + ":" + PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("serverport", "-1");
+				ip_tv.setText("与您处于同一局域网(热点)的用户无需流量无需安装客户端即可通过访问" + url + "或扫描下方二维码访问您共享的文件(网络状态更改时请点击本文字来刷新)");
+				Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
+				hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+				//图像数据转换，使用了矩阵转换
+				BitMatrix bitMatrix = new QRCodeWriter().encode(url, BarcodeFormat.QR_CODE, QRCode.getWidth(), QRCode.getHeight(), hints);
+				int[] pixels = new int[QRCode.getWidth() * QRCode.getHeight()];
+				//下面这里按照二维码的算法，逐个生成二维码的图片，
+				//两个for循环是图片横列扫描的结果
+				for (int y = 0; y < QRCode.getHeight(); y++)
+				{
+					for (int x = 0; x < QRCode.getWidth(); x++)
+					{
+						if (bitMatrix.get(x, y))
+						{
+							pixels[y * QRCode.getWidth() + x] = 0xff000000;
+						}
+						else
+						{
+							pixels[y * QRCode.getWidth() + x] = 0xffffffff;
+						}
+					}
+				}
+				//生成二维码图片的格式，使用ARGB_8888
+				Bitmap bitmap = Bitmap.createBitmap(QRCode.getWidth(), QRCode.getHeight(), Bitmap.Config.ARGB_8888);
+				bitmap.setPixels(pixels, 0, QRCode.getWidth(), 0, 0, QRCode.getWidth(), QRCode.getHeight());
+				QRCode.setImageBitmap(bitmap);
+				QRCode.setVisibility(View.VISIBLE);
+			}
 		}
 		else
 		{
-			String url="http://" + ip + ":" + PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("serverport", "-1");
-			ip_tv.setText("与您处于同一局域网(热点)的用户无需流量无需安装客户端即可通过访问" + url + "或扫描下方二维码访问您共享的文件(网络状态更改时请点击本文字来刷新)");
-			Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
-			hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
-			//图像数据转换，使用了矩阵转换
-			BitMatrix bitMatrix = new QRCodeWriter().encode(url, BarcodeFormat.QR_CODE, QRCode.getWidth(), QRCode.getHeight(), hints);
-			int[] pixels = new int[QRCode.getWidth() * QRCode.getHeight()];
-			//下面这里按照二维码的算法，逐个生成二维码的图片，
-			//两个for循环是图片横列扫描的结果
-			for (int y = 0; y < QRCode.getHeight(); y++)
-			{
-				for (int x = 0; x < QRCode.getWidth(); x++)
-				{
-					if (bitMatrix.get(x, y))
-					{
-						pixels[y * QRCode.getWidth() + x] = 0xff000000;
-					}
-					else
-					{
-						pixels[y * QRCode.getWidth() + x] = 0xffffffff;
-					}
-				}
-			}
-			//生成二维码图片的格式，使用ARGB_8888
-			Bitmap bitmap = Bitmap.createBitmap(QRCode.getWidth(), QRCode.getHeight(), Bitmap.Config.ARGB_8888);
-			bitmap.setPixels(pixels, 0, QRCode.getWidth(), 0, 0, QRCode.getWidth(), QRCode.getHeight());
-			QRCode.setImageBitmap(bitmap);
+			ip_tv.setText("服务未开启");
+			QRCode.setVisibility(View.GONE);
 		}
 	}
 	@Override
@@ -120,6 +130,12 @@ public class MainFragment extends Fragment
 						getActivity().stopService(intent);
 					}
 					update_status();
+					try
+					{
+						refreshQR();
+					}
+					catch (WriterException e)
+					{}
 					/*new Handler().postDelayed(new Runnable(){
 
 					 @Override
