@@ -13,6 +13,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import net.newlydev.fileshare_android.threads.HttpThread;
 import android.os.*;
+import android.app.*;
+import net.newlydev.fileshare_android.activities.*;
 
 public class MainService extends Service
 {
@@ -74,6 +76,7 @@ public class MainService extends Service
 		builder.setContentText("点击管理");
 		builder.setSmallIcon(R.drawable.ic_launcher);
 		builder.setOngoing(true);
+		builder.setContentIntent(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),0));
 	}
 	
 	@Override

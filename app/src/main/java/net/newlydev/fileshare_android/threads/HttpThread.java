@@ -1,14 +1,15 @@
 package net.newlydev.fileshare_android.threads;
+import android.app.*;
 import android.content.*;
 import android.support.v7.preference.*;
 import android.view.*;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import java.util.regex.*;
+import net.newlydev.file_utils.*;
 import net.newlydev.fileshare_android.*;
 import org.apache.commons.fileupload.*;
-import android.app.*;
-import java.util.*;
 
 public class HttpThread extends Thread
 {
@@ -111,11 +112,20 @@ public class HttpThread extends Thread
 					{
 						if (filename.startsWith("/getfiles"))
 						{
+							String sh;
+							if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
+							{
+								sh = "su";
+							}
+							else
+							{
+								sh = "sh";
+							}
 							String body="",tmpf="";
 							int dirlen=0;
 							session.enterdir(URLDecoder.decode(filename.split("\\?")[1].split("=")[1], "UTF-8"));
-							ArrayList<mFile> files=Utils.listFiles(session.getpath(), PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false));
-							if(files==null)
+							ArrayList<mFile> files=mFile.listFiles(sh, session.getpath(), ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
+							if (files == null)
 							{
 								body = "error";
 								String rethead = "HTTP/1.1 200 OK \r\n" +
@@ -127,17 +137,17 @@ public class HttpThread extends Thread
 								dos.write(body.getBytes("UTF-8"));
 							}
 							else for (mFile file:files)
-							{
-								if (file.isDir())
 								{
-									dirlen++;
-									body = body + "\n" + file.getFileName();
+									if (file.isDir())
+									{
+										dirlen++;
+										body = body + "\n" + file.getFileName();
+									}
+									else
+									{
+										tmpf = tmpf + "\n" + file.getFileName();
+									}
 								}
-								else
-								{
-									tmpf = tmpf + "\n" + file.getFileName();
-								}
-							}
 							body = "ok " + dirlen + body + tmpf;
 							String rethead = "HTTP/1.1 200 OK \r\n" +
 								"Content-Type: text/html; charset=UTF-8\r\n" + 
@@ -162,44 +172,32 @@ public class HttpThread extends Thread
 							}
 							else
 							{
-								Process p=null;
+								String sh;
 								if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
 								{
-									p = Runtime.getRuntime().exec("su");
+									sh = "su";
 								}
 								else
 								{
-									p = Runtime.getRuntime().exec("sh");
+									sh = "sh";
 								}
-								BufferedReader is=new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
-								BufferedWriter os=new BufferedWriter(new OutputStreamWriter(p.getOutputStream(), "UTF-8"));
-								os.write(ctx.getDataDir() + "/bin/fileshare_core" + "\n");
-								os.flush();
-								os.write("0\n");
-								os.write(new File(session.getpath(), downloadname).getPath() + "\n");
-								String fifoname=ctx.getDataDir().getPath() + "/fifo/" + Utils.getRandomString(32);
-								Runtime.getRuntime().exec("mkfifo " + fifoname).waitFor();
-								os.write(fifoname + "\n");
-								os.flush();
-								Thread.sleep(500);
-								String res0=is.readLine();
-								if (res0.startsWith("error0"))
+								try
 								{
-									byte body[]="文件不存在".getBytes("UTF-8");
-									String rethead = "HTTP/1.1 200 OK \r\n" +
-										"Content-Type: text/html; charset=UTF-8\r\n" + 
-										"Content-Length: " + body.length + "\r\n" +
-										"\r\n";
-									dos.write(rethead.getBytes("UTF-8"));
-									dos.write(body);
-									dos.flush();
-								}
-								else
-								{
-									long filesize=Long.parseLong(res0);
-									//BufferedInputStream bis=new BufferedInputStream(new FileInputStream(fifoname));
-									RandomAccessFile bis = new RandomAccessFile(fifoname, "r");
-									try
+									mFile downloadfile=new mFile(new File(session.getpath(), downloadname));
+									InputStream bis=downloadfile.getInputStream(sh, ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
+									long filesize=downloadfile.getSize(sh, ctx.getDataDir() + "/bin/fileshare_core") ;
+									if (filesize == 0)
+									{
+										byte body[]="非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>".getBytes("UTF-8");
+										String rethead = "HTTP/1.1 200 OK \r\n" +
+											"Content-Type: text/html; charset=UTF-8\r\n" + 
+											"Content-Length: " + body.length + "\r\n" +
+											"\r\n";
+										dos.write(rethead.getBytes("UTF-8"));
+										dos.write(body);
+										dos.flush();
+									}
+									else
 									{
 										String rethead = "HTTP/1.1 200 OK \r\n" +
 											"Content-Type: application/octet-stream; charset=UTF-8\r\n" + 
@@ -215,18 +213,25 @@ public class HttpThread extends Thread
 											ch = bis.read(buffer, 0, 1024);  
 										}
 										dos.flush();
-
+										bis.close();
 									}
-									catch (Exception e)
-									{
-										e.printStackTrace();
-										Runtime.getRuntime().exec("rm -f " + fifoname);
-									}
-									bis.close();
 								}
-								os.write("exit");
-								os.flush();
-
+								catch (FileNotFoundException e)
+								{
+									byte body[]="文件不存在".getBytes("UTF-8");
+									String rethead = "HTTP/1.1 200 OK \r\n" +
+										"Content-Type: text/html; charset=UTF-8\r\n" + 
+										"Content-Length: " + body.length + "\r\n" +
+										"\r\n";
+									dos.write(rethead.getBytes("UTF-8"));
+									dos.write(body);
+									dos.flush();
+								}
+								catch (Exception e)
+								{
+									e.printStackTrace();
+									//Runtime.getRuntime().exec("rm -f " + fifoname);
+								}
 							}
 
 						}
@@ -439,7 +444,7 @@ public class HttpThread extends Thread
 						Matcher matcher = Pattern.compile("Content-Disposition: form-data; name=\".*\"; filename=\"(.*){1}\".*").matcher(headers[1]);
 						if (matcher.matches())
 						{
-							uploadfilename = matcher.group(1);
+							uploadfilename = new File(matcher.group(1)).getName();
 						}
 						File uploadfile=new File(session.getpath(), uploadfilename);
 						if (uploadfile.exists())
@@ -456,76 +461,86 @@ public class HttpThread extends Thread
 						}
 						else
 						{
-							Process p=null;
+							/*Process p=null;
+							 if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
+							 {
+							 p = Runtime.getRuntime().exec("su");
+							 }
+							 else
+							 {
+							 p = Runtime.getRuntime().exec("sh");
+							 }
+							 //BufferedReader is=new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
+							 BufferedWriter os=new BufferedWriter(new OutputStreamWriter(p.getOutputStream(), "UTF-8"));
+							 BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
+							 os.write(ctx.getDataDir() + "/bin/fileshare_core" + "\n");
+							 os.flush();
+							 os.write("1\n");
+							 os.write(uploadfile.getPath() + "\n");
+							 String fifoname=ctx.getDataDir().getPath() + "/fifo/" + Utils.getRandomString(32);
+							 Runtime.getRuntime().exec("mkfifo " + fifoname).waitFor();
+							 os.write(fifoname + "\n");
+							 os.flush();
+							 Thread.sleep(500);
+							 String result=br.readLine();
+							 if (result.indexOf("error") != -1)
+							 {
+							 int errorcode=Integer.parseInt(result.split("/")[1].trim());
+							 InputStream is=ms.newInputStream();
+							 byte[] buffer=new byte[1024];
+							 int ch = is.read(buffer);                
+							 while (ch != -1)
+							 {
+							 ch = is.read(buffer, 0, 1024);  
+							 }
+							 byte[] body=("错误:" + errorcode).getBytes("utf-8");
+							 String rethead = "HTTP/1.1 200 OK \r\n" +
+							 "Content-Type: text/html; charset=UTF-8\r\n" + 
+							 "Content-Length: " + body.length + "\r\n" +
+							 "\r\n";
+							 dos.write(rethead.getBytes("UTF-8"));
+							 dos.write(body);
+							 dos.flush();
+							 os.close();
+							 }
+							 else
+							 {
+							 //uploadfile.createNewFile();
+							 RandomAccessFile fos=new RandomAccessFile(fifoname, "rw");*/
+							//ByteArrayOutputStream baos=new ByteArrayOutputStream();
+							String sh;
 							if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
 							{
-								p = Runtime.getRuntime().exec("su");
+								sh = "su";
 							}
 							else
 							{
-								p = Runtime.getRuntime().exec("sh");
+								sh = "sh";
 							}
-							//BufferedReader is=new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
-							BufferedWriter os=new BufferedWriter(new OutputStreamWriter(p.getOutputStream(), "UTF-8"));
-							BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
-							os.write(ctx.getDataDir() + "/bin/fileshare_core" + "\n");
-							os.flush();
-							os.write("1\n");
-							os.write(uploadfile.getPath() + "\n");
-							String fifoname=ctx.getDataDir().getPath() + "/fifo/" + Utils.getRandomString(32);
-							Runtime.getRuntime().exec("mkfifo " + fifoname).waitFor();
-							os.write(fifoname + "\n");
-							os.flush();
-							Thread.sleep(500);
-							String result=br.readLine();
-							if (result.indexOf("error") != -1)
+							OutputStream fos=new mFile(uploadfile).getOutputStream(sh, ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
+							InputStream is=ms.newInputStream();
+							byte[] buffer=new byte[1024];
+							int ch = is.read(buffer);
+							while (ch != -1)
 							{
-								int errorcode=Integer.parseInt(result.split("/")[1].trim());
-								InputStream is=ms.newInputStream();
-								byte[] buffer=new byte[1024];
-								int ch = is.read(buffer);                
-								while (ch != -1)
-								{
-									ch = is.read(buffer, 0, 1024);  
-								}
-								byte[] body=("错误:"+errorcode).getBytes("utf-8");
-								String rethead = "HTTP/1.1 200 OK \r\n" +
-									"Content-Type: text/html; charset=UTF-8\r\n" + 
-									"Content-Length: " + body.length + "\r\n" +
-									"\r\n";
-								dos.write(rethead.getBytes("UTF-8"));
-								dos.write(body);
-								dos.flush();
-								os.close();
+								fos.write(buffer, 0, ch);  
+								ch = is.read(buffer, 0, 1024);  
 							}
-							else
-							{
-								//uploadfile.createNewFile();
-								RandomAccessFile fos=new RandomAccessFile(fifoname, "rw");
-								//ByteArrayOutputStream baos=new ByteArrayOutputStream();
-								InputStream is=ms.newInputStream();
-								byte[] buffer=new byte[1024];
-								int ch = is.read(buffer);                
-								while (ch != -1)
-								{
-									fos.write(buffer, 0, ch);  
-									ch = is.read(buffer, 0, 1024);  
-								}
-								//fos.write(baos.toByteArray());
-								dos.flush();
-								fos.close();
-								is.close();
-								//baos.close();
-								byte[] body="ok".getBytes("utf-8");
-								String rethead = "HTTP/1.1 200 OK \r\n" +
-									"Content-Type: text/html; charset=UTF-8\r\n" + 
-									"Content-Length: " + body.length + "\r\n" +
-									"\r\n";
-								dos.write(rethead.getBytes("UTF-8"));
-								dos.write(body);
-								dos.flush();
-								os.close();
-							}
+							//fos.write(baos.toByteArray());
+							dos.flush();
+							fos.close();
+							is.close();
+							//baos.close();
+							byte[] body="ok".getBytes("utf-8");
+							String rethead = "HTTP/1.1 200 OK \r\n" +
+								"Content-Type: text/html; charset=UTF-8\r\n" + 
+								"Content-Length: " + body.length + "\r\n" +
+								"\r\n";
+							dos.write(rethead.getBytes("UTF-8"));
+							dos.write(body);
+							dos.flush();
+							//os.close();
+							//}
 						}
 					}
 				}

@@ -277,45 +277,5 @@ public class Utils
         }
         return data;  
     }
-	public static ArrayList<mFile> listFiles(String path,boolean useroot) throws IOException
-	{
-		ArrayList<mFile> files=new ArrayList<mFile>();
-		Process p=null;
-		if(useroot)
-		{
-			p=Runtime.getRuntime().exec("su");
-		}else{
-			p=Runtime.getRuntime().exec("sh");
-		}
-		BufferedReader is=new BufferedReader(new InputStreamReader(p.getInputStream(),"UTF-8"));
-		BufferedWriter os=new BufferedWriter(new OutputStreamWriter(p.getOutputStream(),"UTF-8"));
-		String endflag=Utils.getRandomString(32);
-		os.write("ls -l -a "+path+"\n");
-		os.write("echo "+endflag+"\n");
-		os.flush();
-		String buf=is.readLine();
-		if(buf.equals(endflag))
-		{
-			return null;
-		}else while(true)
-		{
-			buf=is.readLine();
-			if(buf.equals(endflag))
-			{
-				break;
-			}
-			if(!(buf.startsWith("-")||buf.startsWith("d")))
-			{
-				continue;
-			}
-			mFile file=new mFile(buf,path);
-			files.add(file);
-			
-			//body=body+"\n"+cs.get(7);
-		}
-		//body="ok "+lines+body;
-		os.write("exit");
-		os.flush();
-		return files;
-	}
+	
 }
