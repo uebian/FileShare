@@ -110,9 +110,9 @@ public class MainFragment extends Fragment
 				@Override
 				public void onClick(View p1)
 				{
-					
-						refreshQR();
-					
+
+					refreshQR();
+
 					// TODO: Implement this method
 				}
 			});
@@ -142,25 +142,9 @@ public class MainFragment extends Fragment
 						getActivity().stopService(intent);
 					}
 					update_status();
-					
-					
-						refreshQR();
-					
-					
-					/*new Handler().postDelayed(new Runnable(){
 
-					 @Override
-					 public void run()
-					 {
-					 update_status();
-					 ((MainActivity)getActivity()).waiting=false;
-					 ((MainActivity)getActivity()).pb.setVisibility(View.GONE);
-					 switch_ss.setEnabled(true);
-					 // TODO: Implement this method
-					 }
-					 }, 1500);*/
 
-					// TODO: Implement this method
+					refreshQR();
 				}
 			});
 
@@ -174,10 +158,10 @@ public class MainFragment extends Fragment
 	{
 		// TODO: Implement this method
 		super.onResume();
-	
-			refreshQR();
-		
-		
+
+		refreshQR();
+
+
 	}
 
 

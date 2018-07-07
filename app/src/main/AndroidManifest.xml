@@ -25,6 +25,11 @@
 				<category android:name="android.intent.category.LAUNCHER"/>
 			</intent-filter>
 		</activity>
+		<activity
+			android:name=".activities.UpdateManagerActivity"
+			android:label="更新管理器"
+			android:launchMode="singleTask">
+		</activity>
 		<service android:name=".MainService"/>
 	</application>
 </manifest>

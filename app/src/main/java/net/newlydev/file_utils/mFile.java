@@ -110,7 +110,13 @@ public class mFile
 		//Runtime.getRuntime().exec("mkfifo " + fifopath).waitFor();
 		os.write(fifopath + "\n");
 		os.flush();
-		BufferedReader dis=new BufferedReader(new FileReader(fifopath));
+		BufferedReader dis=null;
+		try{
+		dis=new BufferedReader(new FileReader(fifopath));
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 		boolean isdirf=false;
 		String line;
 		int c=1;
