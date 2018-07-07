@@ -285,7 +285,7 @@ public class HttpThread extends Thread
 											AlertDialog.Builder ab=new AlertDialog.Builder(ctx);
 											ab.setCancelable(false);
 											ab.setTitle("FileShare");
-											ab.setMessage("有人请求您的权限来访问您的文件");
+											ab.setMessage("下列用户请求您的权限来访问您的文件\nip地址:"+client.getInetAddress().toString());
 											ab.setPositiveButton("授权", new DialogInterface.OnClickListener(){
 
 													@Override

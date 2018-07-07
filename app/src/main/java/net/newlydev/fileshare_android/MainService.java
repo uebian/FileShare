@@ -110,8 +110,9 @@ public class MainService extends Service
 					ss.close();
 
 				}
-				catch (IOException e)
-				{}}
+				catch (Exception e)
+				{}
+			}
 		}.start();
 		// TODO: Implement this method
 		super.onDestroy();
