@@ -3,7 +3,7 @@ package net.newlydev.file_utils;
 import java.util.*;
 import java.io.*;
 import org.apache.commons.io.input.*;
-import android.util.*;
+import android.util.Base64;
 
 public class mFile
 {

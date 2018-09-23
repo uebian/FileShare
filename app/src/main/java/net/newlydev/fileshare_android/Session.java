@@ -2,7 +2,7 @@ package net.newlydev.fileshare_android;
 import android.content.*;
 import android.preference.*;
 import java.util.*;
-import org.apache.http.impl.io.*;
+//import org.apache.http.impl.io.*;
 
 public class Session
 {

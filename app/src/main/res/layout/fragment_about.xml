@@ -30,9 +30,17 @@
 
 		<Button
 			android:layout_height="wrap_content"
-			android:layout_width="match_parent"
-			android:text="源代码(需有效的网络连接)"
-			android:id="@+id/fragment_about_sourcecode_btn"/>
+			android:layout_width="0dp"
+			android:text="源代码Github"
+			android:id="@+id/fragment_about_sourcecode_github_btn"
+			android:layout_weight="1.0"/>
+
+		<Button
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:text="源代码码云"
+			android:id="@+id/fragment_about_sourcecode_gitee_btn"
+			android:layout_weight="1.0"/>
 
 	</LinearLayout>
 

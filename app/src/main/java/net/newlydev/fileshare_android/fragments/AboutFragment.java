@@ -16,7 +16,7 @@ public class AboutFragment extends Fragment
 	{
 		// TODO: Implement this method
 		View rootview=inflater.inflate(R.layout.fragment_about,container,false);
-		rootview.findViewById(R.id.fragment_about_sourcecode_btn).setOnClickListener(new OnClickListener(){
+		rootview.findViewById(R.id.fragment_about_sourcecode_github_btn).setOnClickListener(new OnClickListener(){
 
 				@Override
 				public void onClick(View p1)
@@ -27,7 +27,17 @@ public class AboutFragment extends Fragment
 					// TODO: Implement this method
 				}
 			});
-		
+		rootview.findViewById(R.id.fragment_about_sourcecode_gitee_btn).setOnClickListener(new OnClickListener(){
+
+				@Override
+				public void onClick(View p1)
+				{
+					Uri uri = Uri.parse("https://gitee.com/uebian/fileshare");
+					Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+					startActivity(intent);
+					// TODO: Implement this method
+				}
+			});
 		return rootview;
 		//return super.onCreateView(inflater,container,savedInstanceState);
 	}
