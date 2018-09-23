@@ -32,10 +32,10 @@ public class MainActivity extends mActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		JPermissionUtil.requestAllPermission(this);
-		MobileAds.initialize(this, "ca-app-pub-4267459436057308~9756116155");
+		
 		AdView adview=(AdView) findViewById(R.id.adView);
 		//AdRequest adRequest = new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
-		AdRequest adRequest=new AdRequest.Builder().build();
+		AdRequest adRequest=new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
         adview.loadAd(adRequest);
 		final Fragment statusfragment=new MainFragment();
 		final Fragment aboutfragment=new AboutFragment();

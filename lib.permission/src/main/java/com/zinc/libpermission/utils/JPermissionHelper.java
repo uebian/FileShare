@@ -8,7 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.PermissionChecker;
+//import android.support.v4.content.PermissionChecker;
 import android.support.v4.util.SimpleArrayMap;
 import android.util.Log;
 
