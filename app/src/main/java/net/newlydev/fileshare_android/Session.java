@@ -13,7 +13,12 @@ public class Session
 	public Session(Context ctx)
 	{
 		token = Utils.getRandomString(32);
-		rootpath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("rootpath", "/");
+		if(PreferenceManager.getDefaultSharedPreferences(ctx).getString("filesystem", "api").equals("api"))
+		{
+			rootpath="/";
+		}else{
+			rootpath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("rootpath", "/");
+		}
 		path=rootpath;
 		sessions.add(this);
 	}

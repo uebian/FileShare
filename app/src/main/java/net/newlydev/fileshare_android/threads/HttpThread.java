@@ -10,6 +10,8 @@ import java.util.regex.*;
 import net.newlydev.file_utils.*;
 import net.newlydev.fileshare_android.*;
 import org.apache.commons.fileupload.*;
+import android.support.v4.provider.*;
+import android.net.*;
 
 public class HttpThread extends Thread
 {
@@ -112,52 +114,118 @@ public class HttpThread extends Thread
 					{
 						if (filename.startsWith("/getfiles"))
 						{
-							String sh;
-							if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
+							session.enterdir(URLDecoder.decode(filename.split("\\?")[1].split("=")[1], "UTF-8"));
+							String body="",tmpf="";
+							int dirlen=0;
+							String filesystemtype=PreferenceManager.getDefaultSharedPreferences(ctx).getString("filesystem", "api");
+							if (filesystemtype.equals("api"))
 							{
-								sh = "su";
+								String rootpath=PreferenceManager.getDefaultSharedPreferences(ctx).getString("uripath", null);
+								if (rootpath == null)
+								{
+									body = "error";
+									String rethead = "HTTP/1.1 200 OK \r\n" +
+										"Content-Type: text/html; charset=UTF-8\r\n" + 
+										"Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
+										"\r\n";
+									dos.write(rethead.getBytes("UTF-8"));
+									session.enterdir("..");
+									dos.write(body.getBytes("UTF-8"));
+								}
+								else
+								{
+									DocumentFile df=DocumentFile.fromTreeUri(ctx, Uri.parse(rootpath));
+									for (String dirname:session.getpath().split("/"))
+									{
+										if (!dirname.equals(""))
+										{
+											df = df.findFile(dirname);
+										}
+									}
+									ArrayList<FastDocumentFile> files=new ArrayList<FastDocumentFile>();
+									for (DocumentFile tdf:df.listFiles())
+									{
+										files.add(new FastDocumentFile(tdf));
+									}
+									Collections.sort(files, new Comparator<FastDocumentFile>(){
+
+											@Override
+											public int compare(FastDocumentFile p1, FastDocumentFile p2)
+											{
+												// TODO: Implement this method
+												return p1.getName().compareTo(p2.getName());
+											}
+										});
+									body = body + "\n..";
+									dirlen++;
+									for (FastDocumentFile file:files)
+									{
+										if (file.getDocumentFile().isDirectory())
+										{
+											dirlen++;
+											body = body + "\n" + file.getName();
+										}
+										else
+										{
+											tmpf = tmpf + "\n" + file.getName();
+										}
+									}
+									body = "ok " + dirlen + body + tmpf;
+									String rethead = "HTTP/1.1 200 OK \r\n" +
+										"Content-Type: text/html; charset=UTF-8\r\n" + 
+										"Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
+										"\r\n";
+									dos.write(rethead.getBytes("UTF-8"));
+									dos.write(body.getBytes("UTF-8"));
+								}
 							}
 							else
 							{
-								sh = "sh";
-							}
-							String body="",tmpf="";
-							int dirlen=0;
-							session.enterdir(URLDecoder.decode(filename.split("\\?")[1].split("=")[1], "UTF-8"));
-							ArrayList<mFile> files=mFile.listFiles(sh, session.getpath(), ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
-							if (files == null)
-							{
-								body = "error";
+								String sh;
+								if (filesystemtype.equals("root_shell"))
+								{
+									sh = "su";
+								}
+								else
+								{
+									sh = "sh";
+								}
+								ArrayList<mFile> files=mFile.listFiles(sh, session.getpath(), ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
+								if (files == null)
+								{
+									body = "error";
+									String rethead = "HTTP/1.1 200 OK \r\n" +
+										"Content-Type: text/html; charset=UTF-8\r\n" + 
+										"Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
+										"\r\n";
+									dos.write(rethead.getBytes("UTF-8"));
+									session.enterdir("..");
+									dos.write(body.getBytes("UTF-8"));
+								}
+								else for (mFile file:files)
+									{
+										if (file.isDir())
+										{
+											dirlen++;
+											body = body + "\n" + file.getFileName();
+										}
+										else
+										{
+											tmpf = tmpf + "\n" + file.getFileName();
+										}
+									}
+								body = "ok " + dirlen + body + tmpf;
 								String rethead = "HTTP/1.1 200 OK \r\n" +
 									"Content-Type: text/html; charset=UTF-8\r\n" + 
 									"Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
 									"\r\n";
 								dos.write(rethead.getBytes("UTF-8"));
-								session.enterdir("..");
 								dos.write(body.getBytes("UTF-8"));
 							}
-							else for (mFile file:files)
-								{
-									if (file.isDir())
-									{
-										dirlen++;
-										body = body + "\n" + file.getFileName();
-									}
-									else
-									{
-										tmpf = tmpf + "\n" + file.getFileName();
-									}
-								}
-							body = "ok " + dirlen + body + tmpf;
-							String rethead = "HTTP/1.1 200 OK \r\n" +
-								"Content-Type: text/html; charset=UTF-8\r\n" + 
-								"Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
-								"\r\n";
-							dos.write(rethead.getBytes("UTF-8"));
-							dos.write(body.getBytes("UTF-8"));
 						}
 						else if (filename.startsWith("/download"))
 						{
+							String filesystemtype=PreferenceManager.getDefaultSharedPreferences(ctx).getString("filesystem", "api");
 							String downloadname=URLDecoder.decode(filename.split("\\?")[1].split("=")[1], "UTF-8") ;
 							if (downloadname.indexOf("/") != -1)
 							{
@@ -170,10 +238,53 @@ public class HttpThread extends Thread
 								dos.write(body);
 								dos.flush();
 							}
+							else if (filesystemtype.equals("api"))
+							{
+								DocumentFile df=DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uripath", null)));
+								for (String dirname:session.getpath().split("/"))
+								{
+									if (!dirname.equals(""))
+									{
+										df = df.findFile(dirname);
+									}
+								}
+								DocumentFile downloadfile=df.findFile(downloadname);
+								InputStream bis=ctx.getContentResolver().openInputStream(downloadfile.getUri());
+								long filesize=downloadfile.length();
+								if (filesize == 0)
+								{
+									byte body[]="非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>".getBytes("UTF-8");
+									String rethead = "HTTP/1.1 200 OK \r\n" +
+										"Content-Type: text/html; charset=UTF-8\r\n" + 
+										"Content-Length: " + body.length + "\r\n" +
+										"\r\n";
+									dos.write(rethead.getBytes("UTF-8"));
+									dos.write(body);
+									dos.flush();
+								}
+								else
+								{
+									String rethead = "HTTP/1.1 200 OK \r\n" +
+										"Content-Type: application/octet-stream; charset=UTF-8\r\n" + 
+										"Content-Length: " + filesize + "\r\n" +
+										"Content-Disposition: attachment; filename=" + downloadname + "\r\n" +
+										"\r\n";
+									dos.write(rethead.getBytes("UTF-8"));
+									byte[] buffer=new byte[1024];
+									int ch = bis.read(buffer);
+									while (ch != -1)
+									{
+										dos.write(buffer, 0, ch);  
+										ch = bis.read(buffer, 0, 1024);  
+									}
+									dos.flush();
+									bis.close();
+								}
+							}
 							else
 							{
 								String sh;
-								if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
+								if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("root_shell", false))
 								{
 									sh = "su";
 								}
@@ -235,8 +346,22 @@ public class HttpThread extends Thread
 							}
 
 						}
-						else
+						else if(PreferenceManager.getDefaultSharedPreferences(ctx).getString("filesystem", "api").equals("api") && PreferenceManager.getDefaultSharedPreferences(ctx).getString("uripath", null)==null)
 						{
+							String body="",tmp="";
+							BufferedReader is=new BufferedReader(new InputStreamReader(ctx.getAssets().open("error.html"),"UTF-8"));
+							while((tmp=is.readLine())!=null)
+							{
+								body=body+tmp+"\n";
+							}
+							body=body.replaceFirst("contentarea","起始路径未配置，请在开服端的FileShare应用上进行配置");
+							String rethead = "HTTP/1.1 200 OK \r\n" +
+								"Content-Type: text/html; charset=UTF-8\r\n" + 
+								"Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
+								"\r\n";
+							dos.write(rethead.getBytes("UTF-8"));
+							dos.write(body.getBytes("UTF-8"));
+						}else{
 							InputStream is=ctx.getClassLoader().getResourceAsStream("assets/main.html");
 							String rethead = "HTTP/1.1 200 OK \r\n" +
 								"Content-Type: text/html; charset=UTF-8\r\n" + 
@@ -285,7 +410,7 @@ public class HttpThread extends Thread
 											AlertDialog.Builder ab=new AlertDialog.Builder(ctx);
 											ab.setCancelable(false);
 											ab.setTitle("FileShare");
-											ab.setMessage("下列用户请求您的权限来访问您的文件\nip地址:"+client.getInetAddress().toString());
+											ab.setMessage("下列用户请求您的权限来访问您的文件\nip地址:" + client.getInetAddress().toString());
 											ab.setPositiveButton("授权", new DialogInterface.OnClickListener(){
 
 													@Override
@@ -406,8 +531,7 @@ public class HttpThread extends Thread
 				}
 				else if (filename.startsWith("/upload"))
 				{
-
-					Thread.sleep(500);
+					String filesystemtype=PreferenceManager.getDefaultSharedPreferences(ctx).getString("filesystem", "api");
 					Session session=null;
 					String t=null;
 					if (cookies != null)
@@ -423,6 +547,7 @@ public class HttpThread extends Thread
 					if (t != null)
 					{
 						session = Session.getSession(t);
+						
 					}
 					if (session == null)
 					{
@@ -459,57 +584,43 @@ public class HttpThread extends Thread
 							dos.write(body);
 							dos.flush();
 						}
-						else
+						else if (filesystemtype.equals("api"))
 						{
-							/*Process p=null;
-							 if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
-							 {
-							 p = Runtime.getRuntime().exec("su");
-							 }
-							 else
-							 {
-							 p = Runtime.getRuntime().exec("sh");
-							 }
-							 //BufferedReader is=new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
-							 BufferedWriter os=new BufferedWriter(new OutputStreamWriter(p.getOutputStream(), "UTF-8"));
-							 BufferedReader br=new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
-							 os.write(ctx.getDataDir() + "/bin/fileshare_core" + "\n");
-							 os.flush();
-							 os.write("1\n");
-							 os.write(uploadfile.getPath() + "\n");
-							 String fifoname=ctx.getDataDir().getPath() + "/fifo/" + Utils.getRandomString(32);
-							 Runtime.getRuntime().exec("mkfifo " + fifoname).waitFor();
-							 os.write(fifoname + "\n");
-							 os.flush();
-							 Thread.sleep(500);
-							 String result=br.readLine();
-							 if (result.indexOf("error") != -1)
-							 {
-							 int errorcode=Integer.parseInt(result.split("/")[1].trim());
-							 InputStream is=ms.newInputStream();
-							 byte[] buffer=new byte[1024];
-							 int ch = is.read(buffer);                
-							 while (ch != -1)
-							 {
-							 ch = is.read(buffer, 0, 1024);  
-							 }
-							 byte[] body=("错误:" + errorcode).getBytes("utf-8");
-							 String rethead = "HTTP/1.1 200 OK \r\n" +
-							 "Content-Type: text/html; charset=UTF-8\r\n" + 
-							 "Content-Length: " + body.length + "\r\n" +
-							 "\r\n";
-							 dos.write(rethead.getBytes("UTF-8"));
-							 dos.write(body);
-							 dos.flush();
-							 os.close();
-							 }
-							 else
-							 {
-							 //uploadfile.createNewFile();
-							 RandomAccessFile fos=new RandomAccessFile(fifoname, "rw");*/
-							//ByteArrayOutputStream baos=new ByteArrayOutputStream();
+							DocumentFile df=DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uripath", null)));
+							for (String dirname:session.getpath().split("/"))
+							{
+								if (!dirname.equals(""))
+								{
+									df = df.findFile(dirname);
+								}
+							}
+							DocumentFile uploadcf=df.createFile("application/octet-stream",uploadfilename);
+							OutputStream fos=ctx.getContentResolver().openOutputStream(uploadcf.getUri());
+							InputStream is=ms.newInputStream();
+							byte[] buffer=new byte[1024];
+							int ch = is.read(buffer);
+							while (ch != -1)
+							{
+								fos.write(buffer, 0, ch);  
+								ch = is.read(buffer, 0, 1024);  
+							}
+							//fos.write(baos.toByteArray());
+							dos.flush();
+							fos.close();
+							is.close();
+							//baos.close();
+							byte[] body="ok".getBytes("utf-8");
+							String rethead = "HTTP/1.1 200 OK \r\n" +
+								"Content-Type: text/html; charset=UTF-8\r\n" + 
+								"Content-Length: " + body.length + "\r\n" +
+								"\r\n";
+							dos.write(rethead.getBytes("UTF-8"));
+							dos.write(body);
+							dos.flush();
+						}else
+						{
 							String sh;
-							if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("useroot", false))
+							if (filesystemtype.equals("root_shell"))
 							{
 								sh = "su";
 							}
@@ -544,7 +655,6 @@ public class HttpThread extends Thread
 						}
 					}
 				}
-
 			}
 			client.close();
 

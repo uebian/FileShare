@@ -10,7 +10,7 @@ import android.view.*;
 import android.widget.*;
 import android.widget.AdapterView.*;
 import com.google.android.gms.ads.*;
-import com.zinc.libpermission.utils.*;
+//import com.zinc.libpermission.utils.*;
 import java.io.*;
 import net.newlydev.fileshare_android.*;
 import net.newlydev.fileshare_android.activities.*;
@@ -19,6 +19,7 @@ import net.newlydev.fileshare_android.fragments.*;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import net.newlydev.fileshare_android.R;
+import android.support.v7.preference.*;
 
 public class MainActivity extends mActivity
 {
@@ -31,8 +32,7 @@ public class MainActivity extends mActivity
 		// TODO: Implement this method
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		JPermissionUtil.requestAllPermission(this);
-		
+		//JPermissionUtil.requestAllPermission(this);
 		AdView adview=(AdView) findViewById(R.id.adView);
 		//AdRequest adRequest = new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
 		AdRequest adRequest=new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
@@ -175,4 +175,17 @@ public class MainActivity extends mActivity
 		}
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		// TODO: Implement this method
+		super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode==1 && resultCode==RESULT_OK)
+		{
+			Toast.makeText(this,"起始目录已更新",Toast.LENGTH_SHORT).show();
+			PreferenceManager.getDefaultSharedPreferences(this).edit().putString("uripath",data.getData().toString()).apply();
+			Session.sessions.clear();
+		}
+	}
+	
 }
