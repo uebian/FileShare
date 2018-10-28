@@ -42,7 +42,8 @@ public class MainFragment extends Fragment
 
 				@Override
 				public void run()
-				{if (Utils.isMainServiceRunning(getActivity()))
+				{
+					if (Utils.isMainServiceRunning(getActivity()))
 					{
 						String ip=Utils.getLocalIpAddress();
 						if (ip.equals("0"))

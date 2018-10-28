@@ -108,7 +108,6 @@ public class MainService extends Service
 				try
 				{
 					ss.close();
-
 				}
 				catch (Exception e)
 				{}
@@ -116,6 +115,7 @@ public class MainService extends Service
 		}.start();
 		// TODO: Implement this method
 		super.onDestroy();
+		Session.sessions.clear();
 	}
 	
 	public class mBinder extends Binder

@@ -3,29 +3,37 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <android.support.v7.preference.PreferenceCategory
-        android:title="服务器">
-
+        android:title="常规">
         <android.support.v7.preference.EditTextPreference
             android:key="serverport"
-            android:title="端口号(>1024)"
+            android:title="服务器端口号(>1024)"
             android:defaultValue="8080"/>
-		<android.support.v7.preference.SwitchPreferenceCompat
-			android:key="useroot"
-			android:title="使用root权限访问文件"
-			android:defaultValue="false"/>
+		<android.support.v7.preference.Preference
+            android:key="getpath"
+			android:subtitle="更改时会重置客户端会话"
+            android:title="更改起始路径"/>
 		<android.support.v7.preference.EditTextPreference
             android:key="rootpath"
-            android:title="虚拟根目录"
+            android:title="起始目录(绝对路径)"
+			android:subtitle="更改时会重置客户端会话"
             android:defaultValue="/"/>
     </android.support.v7.preference.PreferenceCategory>
 	<android.support.v7.preference.PreferenceCategory
         android:title="安全">
-		<ListPreference 
+		<android.support.v7.preference.ListPreference 
 			android:key="authtype"
 			android:title="身份认证方式"
 			android:defaultValue="passwd"/>
 		<android.support.v7.preference.EditTextPreference
             android:key="password"
             android:title="密码"/>
+	</android.support.v7.preference.PreferenceCategory>
+	<android.support.v7.preference.PreferenceCategory
+        android:title="高级">
+		<android.support.v7.preference.ListPreference
+			android:key="filesystem"
+			android:title="访问文件系统的方式"
+			android:subtitle="更改时会重置客户端会话"
+			android:defaultValue="api"/>
 	</android.support.v7.preference.PreferenceCategory>
 </android.support.v7.preference.PreferenceScreen>
