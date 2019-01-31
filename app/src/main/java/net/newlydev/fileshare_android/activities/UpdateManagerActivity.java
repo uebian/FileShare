@@ -58,8 +58,8 @@ public class UpdateManagerActivity extends mActivity
 								{
 									try
 									{
-										InputStream is=getClassLoader().getResourceAsStream("assets/bin/fileshare_core");
-										File f = new File(getDataDir() + "/bin/fileshare_core");
+										InputStream is=getClassLoader().getResourceAsStream("assets/bin/fileutils");
+										File f = new File(getDataDir() + "/bin/fileutils");
 										if (f.exists())
 										{
 											f.delete();

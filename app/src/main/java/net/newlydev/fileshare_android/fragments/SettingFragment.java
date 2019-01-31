@@ -1,15 +1,16 @@
 package net.newlydev.fileshare_android.fragments;
 
+import android.*;
+import android.content.*;
+import android.content.pm.*;
 import android.os.*;
+import android.support.v4.app.*;
 import android.support.v7.app.*;
 import android.support.v7.preference.*;
-import java.io.*;
+import android.widget.*;
 import net.newlydev.fileshare_android.*;
 
 import net.newlydev.fileshare_android.R;
-import android.graphics.drawable.*;
-import android.view.View.*;
-import android.content.*;
 
 public class SettingFragment extends PreferenceFragmentCompat
 {
@@ -52,20 +53,40 @@ public class SettingFragment extends PreferenceFragmentCompat
 				}
 			});
 		
-		
+		findPreference("cleanv").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+
+				@Override
+				public boolean onPreferenceClick(Preference p1)
+				{
+					Session.sessions.clear();
+					Toast.makeText(getActivity(),"操作成功",Toast.LENGTH_SHORT).show();
+					// TODO: Implement this method
+					return false;
+				}
+			});
 		final EditTextPreference rootpath=(EditTextPreference) findPreference("rootpath");
 		rootpath.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
 
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
 				{
+					if(!((String)p2).endsWith("/"))
+					{
+						AlertDialog.Builder ab=new AlertDialog.Builder(getActivity());
+						ab.setTitle("更改未保存");
+						ab.setCancelable(false);
+						ab.setPositiveButton("确定",null);
+						ab.setMessage("您的输入有误，请输入以\"/\"结尾的目录路径");
+						ab.show();
+						return false;
+					}
 					Session.sessions.clear();
 					// TODO: Implement this method
 					return true;
 				}
 			});
 		ListPreference lp=(ListPreference) findPreference("authtype");
-		lp.setEntries(new String[]{"无认证（不安全）","密码验证","询问我经过我许可"});
+		lp.setEntries(new String[]{"无认证(不安全)","密码验证","询问我经过我许可(实验性)"});
 		lp.setEntryValues(new String[]{"none","passwd","askme"});
 		final EditTextPreference pwd=(EditTextPreference) findPreference("password");
 		final Preference getpath=findPreference("getpath");
@@ -127,10 +148,30 @@ public class SettingFragment extends PreferenceFragmentCompat
 			getpath.setVisible(true);
 		}
 		filesystem.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
-
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
 				{
+					if(p2.equals("shell"))
+					{
+						if(ActivityCompat.checkSelfPermission(getActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED)
+						{
+							AlertDialog.Builder ab=new AlertDialog.Builder(getActivity());
+							ab.setMessage("本选项需要读写sdcard的权限");
+							ab.setTitle("权限");
+							ab.setPositiveButton("授权", new DialogInterface.OnClickListener(){
+
+									@Override
+									public void onClick(DialogInterface p1, int p2)
+									{
+										ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+										// TODO: Implement this method
+									}
+								});
+							ab.setNegativeButton("取消",null);
+							ab.show();
+							return false;
+						}
+					}
 					if(!p2.equals("api"))
 					{
 						rootpath.setVisible(true);
@@ -139,6 +180,7 @@ public class SettingFragment extends PreferenceFragmentCompat
 						rootpath.setVisible(false);
 						getpath.setVisible(true);
 					}
+					Session.sessions.clear();
 					// TODO: Implement this method
 					return true;
 				}

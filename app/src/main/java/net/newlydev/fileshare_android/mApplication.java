@@ -1,9 +1,9 @@
 package net.newlydev.fileshare_android;
 import android.app.*;
 import com.google.android.gms.ads.*;
-import android.support.multidex.*;
+import android.content.*;
 
-public class mApplication extends MultiDexApplication
+public class mApplication extends Application
 {
 
 	@Override

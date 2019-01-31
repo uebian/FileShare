@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.0"
+    compileSdkVersion 27
+    buildToolsVersion "27.1.0"
 
     defaultConfig {
         applicationId "net.newlydev.fileshare_android"
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
     }
@@ -20,11 +20,10 @@ android {
 }
 
 dependencies {
-	compile 'com.android.support:preference-v14:+'
-	compile 'com.android.support:multidex:+'
-	compile 'com.android.support:appcompat-v7:+'
-	compile 'com.android.support:design:+'
-	compile 'com.android.support:support-v4:+'
-	compile 'com.google.android.gms:play-services-ads:+'
+	compile 'com.android.support:design:27.+'
+	compile 'com.google.android.gms:play-services-ads-lite:+'
+	compile 'com.android.support:preference-v7:27.+'
+	compile 'com.android.support:appcompat-v7:27.+'
+	compile 'com.android.support:support-v4:27.+'
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
