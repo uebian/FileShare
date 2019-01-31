@@ -25,7 +25,7 @@ public class mFile
 	}
 	protected void setDir(boolean isdir)
 	{
-		this.isdir=isdir;
+		this.isdir = isdir;
 	}
 	public long getSize(String sh, String core_bin) throws FileNotFoundException, UnsupportedEncodingException, IOException, InterruptedException
 	{
@@ -36,7 +36,7 @@ public class mFile
 		os.write(core_bin + "\n");
 		os.flush();
 		os.write("2\n");
-		os.write(base64Encode(path.getBytes("UTF-8" )));
+		os.write(base64Encode(path.getBytes("UTF-8")));
 		os.flush();
 		Thread.sleep(100);
 		String res0=is.readLine();
@@ -94,7 +94,7 @@ public class mFile
 		String res0=is.readLine();
 		return new mFileOutputStream(fifopath, os, p);
 	}
-	public static ArrayList<mFile> listFiles(String sh,String path,String core_bin,String fifo_dir) throws IOException, InterruptedException
+	public static ArrayList<mFile> listFiles(String sh, String path, String core_bin, String fifo_dir) throws IOException, InterruptedException
 	{
 		ArrayList<mFile> files=new ArrayList<mFile>();
 		Process p= Runtime.getRuntime().exec(sh);
@@ -106,49 +106,61 @@ public class mFile
 		os.write(base64Encode(path.getBytes("UTF-8")));
 		String fifopath=fifo_dir + getRandomString(32);
 		Runtime.getRuntime().exec("mkfifo " + fifopath).waitFor();
-		
 		//Runtime.getRuntime().exec("mkfifo " + fifopath).waitFor();
 		os.write(fifopath + "\n");
 		os.flush();
 		BufferedReader dis=null;
-		try{
-		dis=new BufferedReader(new FileReader(fifopath));
-		}catch(Exception e)
+		if (is.readLine().startsWith("error"))
 		{
-			e.printStackTrace();
+			return null;
 		}
-		boolean isdirf=false;
-		String line;
-		int c=1;
-		while ((line = dis.readLine())!=null){
-			if(c==-1)
+		else
+		{
+			try
 			{
-				mFile file=new mFile(new File(path,new String(base64Decode(line),"UTF-8")));
-				file.setDir(isdirf);
-				files.add(file);
-			}else{
-				int tmp=Integer.parseInt(line);
-				if(tmp==1)
-				{
-					isdirf=true;
-				}else
-				{
-					isdirf=false;
-				}
+				dis = new BufferedReader(new FileReader(fifopath));
 			}
-			c=c*(-1);
-		}
-		Runtime.getRuntime().exec("rm -f " + fifopath);
-		Collections.sort(files, new Comparator<mFile>(){
-
-				@Override
-				public int compare(mFile p1, mFile p2)
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			boolean isdirf=false;
+			String line;
+			int c=1;
+			while ((line = dis.readLine()) != null)
+			{
+				if (c == -1)
 				{
-					return p1.getFileName().compareTo(p2.getFileName());
-					// TODO: Implement this method
+					mFile file=new mFile(new File(path, new String(base64Decode(line), "UTF-8")));
+					file.setDir(isdirf);
+					files.add(file);
 				}
-			});
-		return files;
+				else
+				{
+					int tmp=Integer.parseInt(line);
+					if (tmp == 1)
+					{
+						isdirf = true;
+					}
+					else
+					{
+						isdirf = false;
+					}
+				}
+				c = c * (-1);
+			}
+			Runtime.getRuntime().exec("rm -f " + fifopath);
+			Collections.sort(files, new Comparator<mFile>(){
+
+					@Override
+					public int compare(mFile p1, mFile p2)
+					{
+						return p1.getFileName().compareTo(p2.getFileName());
+						// TODO: Implement this method
+					}
+				});
+			return files;
+		}
 	}
 	public static String getRandomString(int length)
 	{
@@ -186,11 +198,11 @@ public class mFile
 	}
 	public static String base64Encode(byte[] data)
 	{
-		return Base64.encodeToString(data,Base64.DEFAULT);
+		return Base64.encodeToString(data, Base64.DEFAULT);
 	}
 	public static byte[] base64Decode(String base64str)
 	{
-		return Base64.decode(base64str,Base64.DEFAULT);
+		return Base64.decode(base64str, Base64.DEFAULT);
 	}
 }
 

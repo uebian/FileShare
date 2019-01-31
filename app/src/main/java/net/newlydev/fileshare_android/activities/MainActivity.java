@@ -1,25 +1,24 @@
 package net.newlydev.fileshare_android.activities;
+import android.*;
 import android.content.*;
 import android.content.pm.*;
 import android.os.*;
 import android.support.v4.app.*;
 import android.support.v4.widget.*;
 import android.support.v7.app.*;
+import android.support.v7.preference.*;
 import android.support.v7.widget.*;
 import android.view.*;
 import android.widget.*;
 import android.widget.AdapterView.*;
 import com.google.android.gms.ads.*;
-//import com.zinc.libpermission.utils.*;
 import java.io.*;
 import net.newlydev.fileshare_android.*;
-import net.newlydev.fileshare_android.activities.*;
 import net.newlydev.fileshare_android.fragments.*;
 
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import net.newlydev.fileshare_android.R;
-import android.support.v7.preference.*;
 
 public class MainActivity extends mActivity
 {
@@ -34,14 +33,12 @@ public class MainActivity extends mActivity
 		setContentView(R.layout.activity_main);
 		//JPermissionUtil.requestAllPermission(this);
 		AdView adview=(AdView) findViewById(R.id.adView);
-		//AdRequest adRequest = new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
 		AdRequest adRequest=new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
         adview.loadAd(adRequest);
 		final Fragment statusfragment=new MainFragment();
 		final Fragment aboutfragment=new AboutFragment();
 		final Fragment settingfragment=new SettingFragment();
 		final FragmentManager fragmentManager = getSupportFragmentManager();
-
 		waiting = false;
 		Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar_normal);
 		lv = (ListView) findViewById(R.id.activity_main_list);
@@ -86,9 +83,9 @@ public class MainActivity extends mActivity
 				f.mkdirs();
 				f = new File(getDataDir() + "/fifo/");
 				f.mkdirs();
-				f = new File(getDataDir() + "/bin/fileshare_core");
+				f = new File(getDataDir() + "/bin/fileutils");
 				f.createNewFile();
-				InputStream is=getClassLoader().getResourceAsStream("assets/bin/fileshare_core");
+				InputStream is=getClassLoader().getResourceAsStream("assets/bin/fileutils");
 				FileOutputStream fos=new FileOutputStream(f);
 				byte[] buffer=new byte[1024];
 				int ch = is.read(buffer);                

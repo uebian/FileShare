@@ -15,7 +15,6 @@ import android.net.*;
 
 public class HttpThread extends Thread
 {
-	//public static ArrayList<String> tokens=new ArrayList<String>();
 	MainService ctx;
 	Socket client;
 	DataInputStream dis;
@@ -190,7 +189,7 @@ public class HttpThread extends Thread
 								{
 									sh = "sh";
 								}
-								ArrayList<mFile> files=mFile.listFiles(sh, session.getpath(), ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
+								ArrayList<mFile> files=mFile.listFiles(sh, session.getpath(), ctx.getDataDir() + "/bin/fileutils", ctx.getDataDir().getPath() + "/fifo/");
 								if (files == null)
 								{
 									body = "error";
@@ -284,7 +283,7 @@ public class HttpThread extends Thread
 							else
 							{
 								String sh;
-								if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("root_shell", false))
+								if (filesystemtype.equals("root_shell"))
 								{
 									sh = "su";
 								}
@@ -295,8 +294,8 @@ public class HttpThread extends Thread
 								try
 								{
 									mFile downloadfile=new mFile(new File(session.getpath(), downloadname));
-									InputStream bis=downloadfile.getInputStream(sh, ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
-									long filesize=downloadfile.getSize(sh, ctx.getDataDir() + "/bin/fileshare_core") ;
+									InputStream bis=downloadfile.getInputStream(sh, ctx.getDataDir() + "/bin/fileutils", ctx.getDataDir().getPath() + "/fifo/");
+									long filesize=downloadfile.getSize(sh, ctx.getDataDir() + "/bin/fileutils") ;
 									if (filesize == 0)
 									{
 										byte body[]="非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>".getBytes("UTF-8");
@@ -628,7 +627,7 @@ public class HttpThread extends Thread
 							{
 								sh = "sh";
 							}
-							OutputStream fos=new mFile(uploadfile).getOutputStream(sh, ctx.getDataDir() + "/bin/fileshare_core", ctx.getDataDir().getPath() + "/fifo/");
+							OutputStream fos=new mFile(uploadfile).getOutputStream(sh, ctx.getDataDir() + "/bin/fileutils", ctx.getDataDir().getPath() + "/fifo/");
 							InputStream is=ms.newInputStream();
 							byte[] buffer=new byte[1024];
 							int ch = is.read(buffer);
