@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     buildToolsVersion "27.1.0"
-
     defaultConfig {
         applicationId "net.newlydev.fileshare_android"
         minSdkVersion 14
@@ -25,5 +24,7 @@ dependencies {
 	compile 'com.android.support:preference-v7:27.+'
 	compile 'com.android.support:appcompat-v7:27.+'
 	compile 'com.android.support:support-v4:27.+'
+	//implementation "com.github.topjohnwu.libsu:core:+"
+    //implementation "com.github.topjohnwu.libsu:io:+"
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }

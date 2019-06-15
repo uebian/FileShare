@@ -84,8 +84,11 @@ public class MainFragment extends Fragment
 								QRCode.setImageBitmap(bitmap);
 								QRCode.setVisibility(View.VISIBLE);
 							}
-							catch (WriterException e)
-							{}
+							catch (Exception e)
+							{
+								e.printStackTrace();
+								ip_tv.setText("无法生成二维码，点我重试。也可以通过访问" + url + "访问您共享的文件");
+							}
 						}
 					}
 					else
