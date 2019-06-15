@@ -1,25 +1,18 @@
 package net.newlydev.fileshare_android;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
-import android.support.v7.preference.PreferenceManager;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import net.newlydev.fileshare_android.threads.HttpThread;
-import android.os.*;
 import android.app.*;
+import android.content.*;
+import android.os.*;
+import android.support.v4.app.*;
+import android.support.v7.preference.*;
+import java.io.*;
+import java.net.*;
 import net.newlydev.fileshare_android.activities.*;
+import net.newlydev.fileshare_android.threads.*;
 
 public class MainService extends Service
 {
 	public Handler handler=new Handler();
-	Notification.Builder builder;
+	NotificationCompat.Builder builder;
 	ServerSocket ss;
 	private boolean running=false;
 	private String errorstr="";
@@ -48,7 +41,6 @@ public class MainService extends Service
 				}
 				catch (IOException e)
 				{
-					
 				}
 			}
 		}
@@ -71,18 +63,21 @@ public class MainService extends Service
 	{
 		// TODO: Implement this method
 		super.onCreate();
-		builder= new Notification.Builder(this);
+		builder= new NotificationCompat.Builder(this);
 		builder.setContentTitle("文件共享服务运行中");
 		builder.setContentText("点击管理");
 		builder.setSmallIcon(R.drawable.ic_launcher);
 		builder.setOngoing(true);
 		builder.setContentIntent(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),0));
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			builder.setChannelId("0");
+		}
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
-		((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).notify(0,builder.build());
+		startForeground(0,builder.build());
 		running=true;
 		mainThread.start();
 		// TODO: Implement this method
@@ -100,7 +95,7 @@ public class MainService extends Service
 	@Override
 	public void onDestroy()
 	{
-		((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(0);
+		//((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(0);
 		running=false;
 		new Thread(){
 			@Override

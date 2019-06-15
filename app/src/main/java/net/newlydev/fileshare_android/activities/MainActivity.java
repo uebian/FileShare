@@ -76,32 +76,8 @@ public class MainActivity extends mActivity
 			catch (Exception e)
 			{}
 			Toast.makeText(this, "首次使用，请先设置", Toast.LENGTH_SHORT).show();
-			//String CPU_ABI = android.os.Build.CPU_ABI;
-			try
-			{
-				File f=new File(getDataDir() + "/bin/");
-				f.mkdirs();
-				f = new File(getDataDir() + "/fifo/");
-				f.mkdirs();
-				f = new File(getDataDir() + "/bin/fileutils");
-				f.createNewFile();
-				InputStream is=getClassLoader().getResourceAsStream("assets/bin/fileutils");
-				FileOutputStream fos=new FileOutputStream(f);
-				byte[] buffer=new byte[1024];
-				int ch = is.read(buffer);                
-				while (ch != -1)
-				{
-					fos.write(buffer, 0, ch);  
-					ch = is.read(buffer, 0, 1024);  
-				}
-				f.setExecutable(true);
-				is.close();
-				fos.close();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
+			File f = new File(getDataDir() + "/fifo/");
+			f.mkdirs();
 			lv.setItemChecked(1, true);
 		}
 		else
@@ -111,13 +87,17 @@ public class MainActivity extends mActivity
 				DataInputStream varis=new DataInputStream(new FileInputStream(varfile));
 				if (varis.readInt() < info.versionCode)
 				{
-					startActivity(new Intent(this,UpdateManagerActivity.class));
-					finish();
-					/*DataOutputStream varos=new DataOutputStream(new FileOutputStream(varfile));
+					varis.close();
+					varfile.delete();
+					varfile.createNewFile();
+					DataOutputStream varos=new DataOutputStream(new FileOutputStream(varfile));
 					varos.writeInt(info.versionCode);
-					varos.close();*/
+					varos.close();
 				}
-				varis.close();
+				else
+				{
+					varis.close();
+				}
 			}
 			catch (Exception e)
 			{}
@@ -177,12 +157,12 @@ public class MainActivity extends mActivity
 	{
 		// TODO: Implement this method
 		super.onActivityResult(requestCode, resultCode, data);
-		if(requestCode==1 && resultCode==RESULT_OK)
+		if (requestCode == 1 && resultCode == RESULT_OK)
 		{
-			Toast.makeText(this,"起始目录已更新",Toast.LENGTH_SHORT).show();
-			PreferenceManager.getDefaultSharedPreferences(this).edit().putString("uripath",data.getData().toString()).apply();
+			Toast.makeText(this, "起始目录已更新", Toast.LENGTH_SHORT).show();
+			PreferenceManager.getDefaultSharedPreferences(this).edit().putString("uripath", data.getData().toString()).apply();
 			Session.sessions.clear();
 		}
 	}
-	
+
 }
