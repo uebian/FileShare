@@ -1,43 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.preference.PreferenceScreen
+<androidx.preference.PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.v7.preference.PreferenceCategory
+    <androidx.preference.PreferenceCategory
         android:title="常规">
-        <android.support.v7.preference.EditTextPreference
+        <androidx.preference.EditTextPreference
             android:key="serverport"
             android:title="服务器端口号(>1024)"
             android:defaultValue="8080"/>
-		<android.support.v7.preference.Preference
+		<androidx.preference.Preference
             android:key="getpath"
 			android:subtitle="更改时会重置客户端会话"
             android:title="更改起始路径"/>
-		<android.support.v7.preference.EditTextPreference
+		<androidx.preference.EditTextPreference
             android:key="rootpath"
             android:title="起始目录(绝对路径)"
 			android:subtitle="更改时会重置客户端会话"
             android:defaultValue="/sdcard/"/>
-    </android.support.v7.preference.PreferenceCategory>
-	<android.support.v7.preference.PreferenceCategory
+    </androidx.preference.PreferenceCategory>
+	<androidx.preference.PreferenceCategory
         android:title="安全">
-		<android.support.v7.preference.ListPreference 
+		<androidx.preference.ListPreference
 			android:key="authtype"
 			android:title="身份认证方式"
 			android:defaultValue="passwd"/>
-		<android.support.v7.preference.EditTextPreference
+		<androidx.preference.EditTextPreference
             android:key="password"
             android:title="密码"/>
-		<android.support.v7.preference.Preference
+		<androidx.preference.Preference
             android:key="cleanv"
 			android:subtitle="重置所有客户端会话"
             android:title="移除所有用户访问凭据"/>
-	</android.support.v7.preference.PreferenceCategory>
-	<android.support.v7.preference.PreferenceCategory
+	</androidx.preference.PreferenceCategory>
+	<androidx.preference.PreferenceCategory
         android:title="高级">
-		<android.support.v7.preference.ListPreference
+		<androidx.preference.ListPreference
 			android:key="filesystem"
 			android:title="访问文件系统的方式"
 			android:subtitle="更改时会重置客户端会话"
 			android:defaultValue="api"/>
-	</android.support.v7.preference.PreferenceCategory>
-</android.support.v7.preference.PreferenceScreen>
+	</androidx.preference.PreferenceCategory>
+</androidx.preference.PreferenceScreen>

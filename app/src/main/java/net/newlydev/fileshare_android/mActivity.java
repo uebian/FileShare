@@ -1,5 +1,5 @@
 package net.newlydev.fileshare_android;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class mActivity extends AppCompatActivity
 {

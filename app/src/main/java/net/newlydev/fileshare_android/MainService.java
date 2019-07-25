@@ -2,12 +2,12 @@ package net.newlydev.fileshare_android;
 import android.app.*;
 import android.content.*;
 import android.os.*;
-import android.support.v4.app.*;
-import android.support.v7.preference.*;
+import androidx.core.app.*;
+import androidx.preference.*;
 import java.io.*;
 import java.net.*;
 import net.newlydev.fileshare_android.activities.*;
-import net.newlydev.fileshare_android.threads.*;
+import net.newlydev.fileshare_android.http.*;
 
 public class MainService extends Service
 {
@@ -61,7 +61,6 @@ public class MainService extends Service
 	@Override
 	public void onCreate()
 	{
-		// TODO: Implement this method
 		super.onCreate();
 		builder= new NotificationCompat.Builder(this);
 		builder.setContentTitle("文件共享服务运行中");
@@ -80,7 +79,6 @@ public class MainService extends Service
 		startForeground(0,builder.build());
 		running=true;
 		mainThread.start();
-		// TODO: Implement this method
 		return super.onStartCommand(intent, flags, startId);
 	}
 
@@ -88,7 +86,6 @@ public class MainService extends Service
 	@Override
 	public IBinder onBind(Intent p1)
 	{
-		// TODO: Implement this method
 		return new mBinder();
 	}
 
@@ -108,7 +105,6 @@ public class MainService extends Service
 				{}
 			}
 		}.start();
-		// TODO: Implement this method
 		super.onDestroy();
 		Session.sessions.clear();
 	}

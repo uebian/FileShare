@@ -25,14 +25,12 @@ public class Session
 
 	public String getpath()
 	{
-		// TODO: Implement this method
 		return path;
 	}
 
 	public String getToken()
 	{
 		return token;
-		// TODO: Implement this method
 	}
 	public void enterdir(String name)
 	{

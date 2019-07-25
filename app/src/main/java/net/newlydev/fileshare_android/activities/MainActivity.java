@@ -1,13 +1,12 @@
 package net.newlydev.fileshare_android.activities;
-import android.*;
 import android.content.*;
 import android.content.pm.*;
 import android.os.*;
-import android.support.v4.app.*;
-import android.support.v4.widget.*;
-import android.support.v7.app.*;
-import android.support.v7.preference.*;
-import android.support.v7.widget.*;
+
+import androidx.appcompat.app.*;
+import androidx.fragment.app.FragmentManager;
+import androidx.preference.*;
+import androidx.appcompat.widget.*;
 import android.view.*;
 import android.widget.*;
 import android.widget.AdapterView.*;
@@ -16,8 +15,11 @@ import java.io.*;
 import net.newlydev.fileshare_android.*;
 import net.newlydev.fileshare_android.fragments.*;
 
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+
 import net.newlydev.fileshare_android.R;
 
 public class MainActivity extends mActivity
@@ -28,10 +30,8 @@ public class MainActivity extends mActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		// TODO: Implement this method
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		//JPermissionUtil.requestAllPermission(this);
 		AdView adview=(AdView) findViewById(R.id.adView);
 		AdRequest adRequest=new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
         adview.loadAd(adRequest);
@@ -76,8 +76,8 @@ public class MainActivity extends mActivity
 			catch (Exception e)
 			{}
 			Toast.makeText(this, "首次使用，请先设置", Toast.LENGTH_SHORT).show();
-			File f = new File(getDataDir() + "/fifo/");
-			f.mkdirs();
+//			File f = new File(getDataDir() + "/fifo/");
+//			f.mkdirs();
 			lv.setItemChecked(1, true);
 		}
 		else
@@ -137,7 +137,6 @@ public class MainActivity extends mActivity
 							break;
 					}
 					mDrawerLayout.closeDrawers();
-					// TODO: Implement this method
 				}
 			});
 	}
@@ -145,7 +144,6 @@ public class MainActivity extends mActivity
 	@Override
 	public void onBackPressed()
 	{
-		// TODO: Implement this method
 		if (!waiting)
 		{
 			super.onBackPressed();
@@ -155,7 +153,6 @@ public class MainActivity extends mActivity
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		// TODO: Implement this method
 		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == 1 && resultCode == RESULT_OK)
 		{
