@@ -2,9 +2,9 @@ package net.newlydev.fileshare_android.fragments;
 import android.content.*;
 import android.graphics.*;
 import android.os.*;
-import android.support.v4.app.*;
-import android.support.v7.app.*;
-import android.support.v7.preference.*;
+
+import androidx.appcompat.app.*;
+import androidx.preference.*;
 import android.view.*;
 import android.view.View.*;
 import android.widget.*;
@@ -16,7 +16,8 @@ import net.newlydev.fileshare_android.*;
 import net.newlydev.fileshare_android.activities.*;
 
 import net.newlydev.fileshare_android.R;
-import android.app.Activity;
+
+import androidx.fragment.app.Fragment;
 
 public class MainFragment extends Fragment
 {
@@ -96,8 +97,6 @@ public class MainFragment extends Fragment
 						ip_tv.setText("服务未开启");
 						QRCode.setVisibility(View.GONE);
 					}
-
-					// TODO: Implement this method
 				}
 			}, 100);
 
@@ -105,7 +104,6 @@ public class MainFragment extends Fragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		// TODO: Implement this method
 		View rootview=inflater.inflate(R.layout.fragment_main, container, false);
 		ip_tv = (TextView) rootview.findViewById(R.id.fragment_main_ip_textview);
 		QRCode = (ImageView) rootview.findViewById(R.id.fragment_main_qrcode_imageview);
@@ -114,10 +112,7 @@ public class MainFragment extends Fragment
 				@Override
 				public void onClick(View p1)
 				{
-
 					refreshQR();
-
-					// TODO: Implement this method
 				}
 			});
 		switch_ss = (Switch) rootview.findViewById(R.id.fragment_status_switch);
@@ -160,20 +155,13 @@ public class MainFragment extends Fragment
 	@Override
 	public void onResume()
 	{
-		// TODO: Implement this method
 		super.onResume();
-
 		refreshQR();
-
-
 	}
-
-
 
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
-		// TODO: Implement this method
 		super.onCreate(savedInstanceState);
 		conn = new MyConnection();
 	}
@@ -208,7 +196,6 @@ public class MainFragment extends Fragment
 							((MainActivity)getActivity()).lv.setEnabled(true);
 							switch_ss.setEnabled(true);
 							update_status();
-							// TODO: Implement this method
 						}
 					}, 500);
 				service.service.started = true;
@@ -226,7 +213,6 @@ public class MainFragment extends Fragment
 	@Override
 	public void onDestroy()
 	{
-		// TODO: Implement this method
 		super.onDestroy();
 		if (Utils.isMainServiceRunning(getActivity()))
 		{

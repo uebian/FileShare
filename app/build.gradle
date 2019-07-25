@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.1.0"
+    compileSdkVersion 29
+    buildToolsVersion "29.0.0"
     defaultConfig {
         applicationId "net.newlydev.fileshare_android"
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
     }
@@ -19,12 +19,10 @@ android {
 }
 
 dependencies {
-	compile 'com.android.support:design:27.+'
-	compile 'com.google.android.gms:play-services-ads-lite:+'
-	compile 'com.android.support:preference-v7:27.+'
-	compile 'com.android.support:appcompat-v7:27.+'
-	compile 'com.android.support:support-v4:27.+'
-	//implementation "com.github.topjohnwu.libsu:core:+"
-    //implementation "com.github.topjohnwu.libsu:io:+"
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.android.material:material:1.0.0'
+	implementation 'com.google.android.gms:play-services-ads-lite:+'
+	implementation 'androidx.preference:preference:1.0.0'
+	implementation 'androidx.appcompat:appcompat:1.0.0'
+	implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 }

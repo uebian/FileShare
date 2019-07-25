@@ -4,9 +4,9 @@ import android.*;
 import android.content.*;
 import android.content.pm.*;
 import android.os.*;
-import android.support.v4.app.*;
-import android.support.v7.app.*;
-import android.support.v7.preference.*;
+import androidx.core.app.*;
+import androidx.appcompat.app.*;
+import androidx.preference.*;
 import android.widget.*;
 import net.newlydev.fileshare_android.*;
 
@@ -48,7 +48,6 @@ public class SettingFragment extends PreferenceFragmentCompat
 						ab.show();
 						return false;
 					}
-					// TODO: Implement this method
 					return true;
 				}
 			});
@@ -60,7 +59,6 @@ public class SettingFragment extends PreferenceFragmentCompat
 				{
 					Session.sessions.clear();
 					Toast.makeText(getActivity(),"操作成功",Toast.LENGTH_SHORT).show();
-					// TODO: Implement this method
 					return false;
 				}
 			});
@@ -81,7 +79,6 @@ public class SettingFragment extends PreferenceFragmentCompat
 						return false;
 					}
 					Session.sessions.clear();
-					// TODO: Implement this method
 					return true;
 				}
 			});
@@ -96,7 +93,6 @@ public class SettingFragment extends PreferenceFragmentCompat
 				{
 					Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
 					getActivity().startActivityForResult(i,1);
-					// TODO: Implement this method
 					return false;
 				}
 			});
@@ -110,7 +106,6 @@ public class SettingFragment extends PreferenceFragmentCompat
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
 				{
-					// TODO: Implement this method
 					if(p2.toString().equals(""))
 					{
 						new AlertDialog.Builder(getActivity()).setTitle("更改未保存").setMessage("密码不得为空").setCancelable(false).setPositiveButton("确定",null).show();
@@ -135,7 +130,6 @@ public class SettingFragment extends PreferenceFragmentCompat
 					}else{
 						pwd.setEnabled(false);
 					}
-					// TODO: Implement this method
 					return true;
 				}
 			});
@@ -151,47 +145,45 @@ public class SettingFragment extends PreferenceFragmentCompat
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
 				{
-					if(p2.equals("shell"))
-					{
-						if(ActivityCompat.checkSelfPermission(getActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED)
-						{
-							AlertDialog.Builder ab=new AlertDialog.Builder(getActivity());
-							ab.setMessage("本选项需要读写sdcard的权限");
-							ab.setTitle("权限");
-							ab.setPositiveButton("授权", new DialogInterface.OnClickListener(){
-
-									@Override
-									public void onClick(DialogInterface p1, int p2)
-									{
-										ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
-										// TODO: Implement this method
-									}
-								});
-							ab.setNegativeButton("取消",null);
-							ab.show();
-							return false;
-						}
-					}
+//					if(p2.equals("shell"))
+//					{
+//						if(ActivityCompat.checkSelfPermission(getActivity(),Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_DENIED)
+//						{
+//							AlertDialog.Builder ab=new AlertDialog.Builder(getActivity());
+//							ab.setMessage("本选项需要读写sdcard的权限");
+//							ab.setTitle("权限");
+//							ab.setPositiveButton("授权", new DialogInterface.OnClickListener(){
+//
+//									@Override
+//									public void onClick(DialogInterface p1, int p2)
+//									{
+//										ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+//									}
+//								});
+//							ab.setNegativeButton("取消",null);
+//							ab.show();
+//							return false;
+//						}
+//					}
 					if(!p2.equals("api"))
 					{
-						rootpath.setVisible(true);
-						getpath.setVisible(false);
+//						rootpath.setVisible(true);
+//						getpath.setVisible(false);
+						Toast.makeText(getActivity(),"正在开发...",Toast.LENGTH_LONG).show();
+						return false;
 					}else{
 						rootpath.setVisible(false);
 						getpath.setVisible(true);
 					}
 					Session.sessions.clear();
-					// TODO: Implement this method
 					return true;
 				}
 			});
-		// TODO: Implement this method
 	}
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
-		// TODO: Implement this method
 		super.onCreate(savedInstanceState);
 		
 	}

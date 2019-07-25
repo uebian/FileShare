@@ -1,5 +1,5 @@
 package net.newlydev.fileshare_android;
-import android.support.v4.provider.*;
+import androidx.documentfile.provider.DocumentFile;
 
 public class FastDocumentFile
 {
