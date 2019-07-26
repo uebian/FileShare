@@ -1,12 +1,10 @@
 package net.newlydev.fileshare_android.fragments;
 
-import android.*;
 import android.content.*;
-import android.content.pm.*;
-import android.os.*;
-import androidx.core.app.*;
 import androidx.appcompat.app.*;
 import androidx.preference.*;
+
+import android.os.Bundle;
 import android.widget.*;
 import net.newlydev.fileshare_android.*;
 
@@ -19,10 +17,15 @@ public class SettingFragment extends PreferenceFragmentCompat
 	public void onCreatePreferences(Bundle p1, String p2)
 	{
 		addPreferencesFromResource(R.xml.setting_preference);
-		ListPreference filesystem=(ListPreference) findPreference("filesystem");
-		filesystem.setEntries(new String[]{"Document API","Shell(实验性)","Root权限的Shell(实验性)"});
+		final ListPreference filesystem=(ListPreference) findPreference("fileSystem");
+		final ListPreference lp=(ListPreference) findPreference("authType");
+		final EditTextPreference rootPath=(EditTextPreference) findPreference("rootPath");
+		final EditTextPreference pwd=(EditTextPreference) findPreference("password");
+		final Preference getPath=findPreference("getPath");
+		final EditTextPreference serverPort=(EditTextPreference)findPreference("serverPort");
+		filesystem.setEntries(new String[]{"Document API","Shell(开发中)","Root权限的Shell(开发中)"});
 		filesystem.setEntryValues(new String[]{"api","shell","root_shell"});
-		findPreference("serverport").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+		serverPort.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
 
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
@@ -62,8 +65,7 @@ public class SettingFragment extends PreferenceFragmentCompat
 					return false;
 				}
 			});
-		final EditTextPreference rootpath=(EditTextPreference) findPreference("rootpath");
-		rootpath.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+		rootPath.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
 
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
@@ -82,12 +84,9 @@ public class SettingFragment extends PreferenceFragmentCompat
 					return true;
 				}
 			});
-		ListPreference lp=(ListPreference) findPreference("authtype");
 		lp.setEntries(new String[]{"无认证(不安全)","密码验证","询问我经过我许可(实验性)"});
 		lp.setEntryValues(new String[]{"none","passwd","askme"});
-		final EditTextPreference pwd=(EditTextPreference) findPreference("password");
-		final Preference getpath=findPreference("getpath");
-		getpath.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
+		getPath.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
 				@Override
 				public boolean onPreferenceClick(Preference p1)
 				{
@@ -135,11 +134,11 @@ public class SettingFragment extends PreferenceFragmentCompat
 			});
 		if(!filesystem.getValue().equals("api"))
 		{
-			rootpath.setVisible(true);
-			getpath.setVisible(false);
+			rootPath.setVisible(true);
+			getPath.setVisible(false);
 		}else{
-			rootpath.setVisible(false);
-			getpath.setVisible(true);
+			rootPath.setVisible(false);
+			getPath.setVisible(true);
 		}
 		filesystem.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
 				@Override
@@ -167,13 +166,13 @@ public class SettingFragment extends PreferenceFragmentCompat
 //					}
 					if(!p2.equals("api"))
 					{
-//						rootpath.setVisible(true);
-//						getpath.setVisible(false);
+//						rootPath.setVisible(true);
+//						getPath.setVisible(false);
 						Toast.makeText(getActivity(),"正在开发...",Toast.LENGTH_LONG).show();
 						return false;
 					}else{
-						rootpath.setVisible(false);
-						getpath.setVisible(true);
+						rootPath.setVisible(false);
+						getPath.setVisible(true);
 					}
 					Session.sessions.clear();
 					return true;

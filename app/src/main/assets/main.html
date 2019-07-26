@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
   <title>FileShare</title>
-  <link rel="stylesheet" href="./res/css/mdui.min.css"/>
-  <script src="./res/js/mdui.min.js"></script>
-  <script src="./res/js/download.js"></script>
+  <link rel="stylesheet" href="/res/css/mdui.min.css"/>
+  <script src="/res/js/mdui.min.js"></script>
+  <script src="/res/js/download.js"></script>
   <!--<script src="./res/js/jquery-3.3.1.min.js"></script>-->
 </head>
 <body class="mdui-theme-primary-indigo mdui-theme-accent-pink mdui-appbar-with-toolbar">
@@ -44,7 +44,7 @@ function dogetfiles(fname){
 need=true;
      var iframe=document.getElementById("hidden_frame");
      //alert(iframe);
-     iframe.setAttribute("src","./getfiles?path="+fname,0);
+     iframe.setAttribute("src","/getfiles?path="+fname,0);
      
       //alert(iframe.contentWindow.document.doc.body.innerHTML)
 }

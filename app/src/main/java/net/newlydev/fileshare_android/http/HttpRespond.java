@@ -39,7 +39,7 @@ public class HttpRespond {
         os.flush();
     }
 
-    public void sendErrorMsg(String msgHtml) throws UnsupportedEncodingException, IOException {
+    public void sendErrorMsg(String msgHtml) throws IOException {
         String body = "", tmp = "";
         BufferedReader is = new BufferedReader(new InputStreamReader(ctx.getAssets().open("error.html"), "UTF-8"));
         while ((tmp = is.readLine()) != null) {
@@ -52,6 +52,16 @@ public class HttpRespond {
                 "\r\n";
         os.write(rethead.getBytes("UTF-8"));
         os.write(body.getBytes("UTF-8"));
+        os.flush();
+    }
+    public void sendContent(String content) throws IOException
+    {
+        String rethead = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html; charset=UTF-8\r\n" +
+                "Content-Length: " + content.getBytes("UTF-8").length + "\r\n" +
+                "\r\n";
+        os.write(rethead.getBytes("UTF-8"));
+        os.write(content.getBytes("UTF-8"));
         os.flush();
     }
 }
