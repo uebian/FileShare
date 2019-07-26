@@ -24,7 +24,7 @@ public class MainService extends Service
 			try
 			{
 				started=false;
-				int port=Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("serverport","-1"));
+				int port=Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("serverPort","-1"));
 				ss=new ServerSocket(port);
 			}
 			catch (Exception e)

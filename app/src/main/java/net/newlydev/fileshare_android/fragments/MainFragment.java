@@ -54,7 +54,7 @@ public class MainFragment extends Fragment
 						}
 						else
 						{
-							String url="http://" + ip + ":" + PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("serverport", "-1");
+							String url="http://" + ip + ":" + PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("serverPort", "-1");
 							ip_tv.setText("与您处于同一局域网(热点)的用户无需流量无需安装客户端即可通过访问" + url + "或扫描下方二维码访问您共享的文件(网络状态更改时请点击本文字来刷新)");
 							Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
 							hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
@@ -141,8 +141,6 @@ public class MainFragment extends Fragment
 						getActivity().stopService(intent);
 					}
 					update_status();
-
-
 					refreshQR();
 				}
 			});
@@ -156,6 +154,7 @@ public class MainFragment extends Fragment
 	public void onResume()
 	{
 		super.onResume();
+		update_status();
 		refreshQR();
 	}
 

@@ -4,7 +4,10 @@ import android.content.*;
 import androidx.appcompat.app.*;
 import androidx.preference.*;
 
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.widget.*;
 import net.newlydev.fileshare_android.*;
 
@@ -123,7 +126,18 @@ public class SettingFragment extends PreferenceFragmentCompat
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
 				{
-					if(p2.equals("passwd"))
+					if(p2.equals("askme"))
+					{
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&!Settings.canDrawOverlays(getActivity())) {
+							//没有权限，需要申请权限，因为是打开一个授权页面，所以拿不到返回状态的，所以建议是在onResume方法中从新执行一次校验
+							Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+							intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
+							startActivityForResult(intent, 100);
+							Toast.makeText(getActivity(), "向您显示信息需要开启悬浮窗权限", Toast.LENGTH_SHORT).show();
+							return false;
+						}
+						pwd.setEnabled(false);
+					}else if(p2.equals("passwd"))
 					{
 						pwd.setEnabled(true);
 					}else{
