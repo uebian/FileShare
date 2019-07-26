@@ -1,6 +1,8 @@
 package net.newlydev.fileshare_android;
 import android.content.*;
-import android.preference.*;
+
+import androidx.preference.PreferenceManager;
+
 import java.util.*;
 //import org.apache.http.impl.io.*;
 
@@ -13,17 +15,17 @@ public class Session
 	public Session(Context ctx)
 	{
 		token = Utils.getRandomString(32);
-		if(PreferenceManager.getDefaultSharedPreferences(ctx).getString("filesystem", "api").equals("api"))
+		if(PreferenceManager.getDefaultSharedPreferences(ctx).getString("fileSystem", "api").equals("api"))
 		{
 			rootpath="/";
 		}else{
-			rootpath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("rootpath", "/");
+			rootpath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("rootPath", "/");
 		}
 		path=rootpath;
 		sessions.add(this);
 	}
 
-	public String getpath()
+	public String getPath()
 	{
 		return path;
 	}
@@ -32,7 +34,7 @@ public class Session
 	{
 		return token;
 	}
-	public void enterdir(String name)
+	public void enterDir(String name)
 	{
 		if(name.indexOf("/")!=-1||name.equals("."))
 		{

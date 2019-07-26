@@ -2,11 +2,8 @@ package net.newlydev.fileshare_android.activities;
 import android.content.*;
 import android.content.pm.*;
 import android.os.*;
-
-import androidx.appcompat.app.*;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.*;
-import androidx.appcompat.widget.*;
 import android.view.*;
 import android.widget.*;
 import android.widget.AdapterView.*;
@@ -14,12 +11,10 @@ import com.google.android.gms.ads.*;
 import java.io.*;
 import net.newlydev.fileshare_android.*;
 import net.newlydev.fileshare_android.fragments.*;
-
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-
 import net.newlydev.fileshare_android.R;
 
 public class MainActivity extends mActivity
@@ -35,9 +30,9 @@ public class MainActivity extends mActivity
 		AdView adview=(AdView) findViewById(R.id.adView);
 		AdRequest adRequest=new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
         adview.loadAd(adRequest);
-		final Fragment statusfragment=new MainFragment();
-		final Fragment aboutfragment=new AboutFragment();
-		final Fragment settingfragment=new SettingFragment();
+		final Fragment statusFragment=new MainFragment();
+		final Fragment aboutFragment=new AboutFragment();
+		final Fragment settingFragment=new SettingFragment();
 		final FragmentManager fragmentManager = getSupportFragmentManager();
 		waiting = false;
 		Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar_normal);
@@ -64,7 +59,7 @@ public class MainActivity extends mActivity
 		File varfile=new File(getFilesDir(), "var");
 		if (!varfile.exists())
 		{
-			fragmentManager.beginTransaction().replace(R.id.activity_main_content, settingfragment).commit();
+			fragmentManager.beginTransaction().replace(R.id.activity_main_content, settingFragment).commit();
 			try
 			{
 				varfile.createNewFile();
@@ -76,8 +71,6 @@ public class MainActivity extends mActivity
 			catch (Exception e)
 			{}
 			Toast.makeText(this, "首次使用，请先设置", Toast.LENGTH_SHORT).show();
-//			File f = new File(getDataDir() + "/fifo/");
-//			f.mkdirs();
 			lv.setItemChecked(1, true);
 		}
 		else
@@ -101,7 +94,7 @@ public class MainActivity extends mActivity
 			}
 			catch (Exception e)
 			{}
-			fragmentManager.beginTransaction().replace(R.id.activity_main_content, statusfragment).commit();
+			fragmentManager.beginTransaction().replace(R.id.activity_main_content, statusFragment).commit();
 			lv.setItemChecked(0, true);
 		}
 		final DrawerLayout mDrawerLayout=(DrawerLayout) findViewById(R.id.activity_main_dl);
@@ -127,13 +120,13 @@ public class MainActivity extends mActivity
 					switch (p3)
 					{
 						case 0:
-							fragmentManager.beginTransaction().replace(R.id.activity_main_content, statusfragment).commit();
+							fragmentManager.beginTransaction().replace(R.id.activity_main_content, statusFragment).commit();
 							break;
 						case 1:
-							fragmentManager.beginTransaction().replace(R.id.activity_main_content, settingfragment).commit();
+							fragmentManager.beginTransaction().replace(R.id.activity_main_content, settingFragment).commit();
 							break;
 						case 2:
-							fragmentManager.beginTransaction().replace(R.id.activity_main_content, aboutfragment).commit();
+							fragmentManager.beginTransaction().replace(R.id.activity_main_content, aboutFragment).commit();
 							break;
 					}
 					mDrawerLayout.closeDrawers();
@@ -157,7 +150,7 @@ public class MainActivity extends mActivity
 		if (requestCode == 1 && resultCode == RESULT_OK)
 		{
 			Toast.makeText(this, "起始目录已更新", Toast.LENGTH_SHORT).show();
-			PreferenceManager.getDefaultSharedPreferences(this).edit().putString("uripath", data.getData().toString()).apply();
+			PreferenceManager.getDefaultSharedPreferences(this).edit().putString("uriPath", data.getData().toString()).apply();
 			Session.sessions.clear();
 		}
 	}
