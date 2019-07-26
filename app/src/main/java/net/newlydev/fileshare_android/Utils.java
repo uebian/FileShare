@@ -176,13 +176,4 @@ public class Utils
 		}
 		return sb.toString();
 	}
-	public static byte[] readBytes(InputStream in,int length) throws IOException {  
-        int r=0;  
-        byte[] data=new byte[length];  
-        while(r<length){  
-            r+=in.read(data,r,length-r);  
-        }
-        return data;  
-    }
-	
 }
