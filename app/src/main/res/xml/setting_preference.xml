@@ -17,6 +17,10 @@
             android:title="起始目录(绝对路径)"
 			android:subtitle="更改时会重置客户端会话"
             android:defaultValue="/sdcard/"/>
+		<androidx.preference.SwitchPreference
+			android:key="allowUpload"
+			android:title="允许上传"
+			android:defaultValue="false"/>
     </androidx.preference.PreferenceCategory>
 	<androidx.preference.PreferenceCategory
         android:title="安全">

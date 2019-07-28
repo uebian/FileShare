@@ -128,8 +128,8 @@ public class SettingFragment extends PreferenceFragmentCompat
 				{
 					if(p2.equals("askme"))
 					{
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&!Settings.canDrawOverlays(getActivity())) {
-							//没有权限，需要申请权限，因为是打开一个授权页面，所以拿不到返回状态的，所以建议是在onResume方法中从新执行一次校验
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&!Settings.canDrawOverlays(getActivity()))
+						{
 							Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
 							intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
 							startActivityForResult(intent, 100);

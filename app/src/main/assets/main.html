@@ -208,7 +208,7 @@ for(var i=dirlen+1;i<len;i++)
 addfile(files[i],false);
 }
 }else{
-mdui.alert("错误:不能列出文件。如果您在多次点击确定后仍有这样的提示，请联系开服端在FileShare的APP上修改起始路径。",function(){location.reload()});
+mdui.alert("错误:不能列出文件："+files[0].split(" ")[1]+"如果您在多次点击确定后仍有这样的提示，请联系开服端在FileShare的APP上修改起始路径。",function(){location.reload()});
 }
 pd.close();
 }catch(err)

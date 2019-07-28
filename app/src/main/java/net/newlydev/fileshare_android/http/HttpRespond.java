@@ -25,7 +25,7 @@ public class HttpRespond {
             fileName = "/" + fileName;
         }
         InputStream is = ctx.getClassLoader().getResourceAsStream("assets" + fileName);
-        String rethead = "HTTP/1.1 200 OK \r\n" +
+        String rethead = "HTTP/1.0 200 OK \r\n" +
                 "Content-Length: " + is.available() + "\r\n" +
                 "Content-Type: " + Utils.getContentTypeByExpansion(Utils.getExtensionByCutStr(fileName)) + "; charset=UTF-8\r\n" +
                 "\r\n";
@@ -46,7 +46,7 @@ public class HttpRespond {
             body = body + tmp + "\n";
         }
         body = body.replaceFirst("contentarea", msgHtml);
-        String rethead = "HTTP/1.1 200 OK \r\n" +
+        String rethead = "HTTP/1.0 200 OK \r\n" +
                 "Content-Type: text/html; charset=UTF-8\r\n" +
                 "Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
                 "\r\n";
@@ -56,7 +56,7 @@ public class HttpRespond {
     }
     public void sendContent(String content) throws IOException
     {
-        String rethead = "HTTP/1.1 200 OK \r\n" +
+        String rethead = "HTTP/1.0 200 OK \r\n" +
                 "Content-Type: text/html; charset=UTF-8\r\n" +
                 "Content-Length: " + content.getBytes("UTF-8").length + "\r\n" +
                 "\r\n";
