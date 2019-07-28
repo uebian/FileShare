@@ -62,21 +62,18 @@ public class MainService extends Service
 	public void onCreate()
 	{
 		super.onCreate();
-		builder= new NotificationCompat.Builder(this);
+		builder= new NotificationCompat.Builder(this,"0");
 		builder.setContentTitle("文件共享服务运行中");
 		builder.setContentText("点击管理");
 		builder.setSmallIcon(R.drawable.ic_launcher);
 		builder.setOngoing(true);
 		builder.setContentIntent(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),0));
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-			builder.setChannelId("0");
-		}
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId)
 	{
-		startForeground(0,builder.build());
+		startForeground(1,builder.build());
 		running=true;
 		mainThread.start();
 		return super.onStartCommand(intent, flags, startId);
