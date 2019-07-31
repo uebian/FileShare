@@ -52,12 +52,7 @@ public class MainService extends Service
 		errorstr="";
 		return err;
 	}
-	
-	public boolean isrunning()
-	{
-		return running;
-	}
-	
+
 	@Override
 	public void onCreate()
 	{
@@ -89,7 +84,6 @@ public class MainService extends Service
 	@Override
 	public void onDestroy()
 	{
-		//((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(0);
 		running=false;
 		new Thread(){
 			@Override

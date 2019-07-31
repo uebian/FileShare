@@ -1,92 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh-cmn-Hans">
+
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no" />
   <title>FileShare登录</title>
-  <link rel="stylesheet" href="/res/css/mdui.min.css"/>
+  <link rel="stylesheet" href="/res/css/mdui.min.css" />
   <script src="/res/js/mdui.min.js"></script>
-<script src="/res/js/md5.js"></script>
+  <script src="/res/js/md5.js"></script>
 </head>
+
 <body class=" mdui-theme-primary-indigo mdui-theme-accent-pink">
+  <div class="mdui-appbar">
+    <div class="mdui-toolbar mdui-color-theme">
+      <a class="mdui-typo-headline">FileShare登录</a>
+    </div>
+  </div>
+  <div style="padding:20px;">
+    <div class="mdui-textfield mdui-textfield-floating-label">
+      <label class="mdui-textfield-label">密码</label>
+      <input class="mdui-textfield-input" id="pwd" type="password" />
+    </div>
+    <div style="text-align:right;">
+      <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent" onclick="do_login();">登录</button>
+    </div>
+  </div>
 
-<!-- appbar -->
-  
-<div class="mdui-appbar">
-  <div class="mdui-toolbar mdui-color-theme">
-    <a class="mdui-typo-headline">FileShare登录</a>
-      </div>
-</div>
-<div style="padding:20px;">
-  <div class="mdui-textfield mdui-textfield-floating-label">
-  <label class="mdui-textfield-label">密码</label>
-  <input class="mdui-textfield-input" id="pwd" type="password"/>
-</div>
-<div style = "text-align:right;">
-<button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent" onclick="do_login();">登录</button>
-</div>
-</div>
+  <iframe name='hidden_frame' id="hidden_frame" style="display:none" onload="iframeLoad(this);"></iframe>
+  <div class="mdui-dialog" id="progressDialog" style="padding:20px">
 
-<iframe name='hidden_frame' id="hidden_frame" style="display:none" onload="iframeLoad(this);"></iframe>
-<div class="mdui-dialog" id="progressDialog" style="padding:20px">
-  
-  <div>请稍后...</div>
-  <br/>
-  <div class="mdui-progress">
-  <div class="mdui-progress-indeterminate"></div>
-</div>
-</div>
-<script language="javascript">  
-//alert("test");
-  var pd=new mdui.Dialog("#progressDialog",{modal: true});
-function iframeLoad(iframe){   
-var doc = iframe.contentWindow.document;   
-var html = doc.body.innerHTML;
-//alert(html);
-if((html.indexOf("ok")!=-1) || (html.indexOf("no")!=-1))
-{
-  
-  if(html.indexOf("no")!=-1)
-  {
-  pd.close();
-  mdui.alert("密码错误");
-  }else{
-  location.reload();
-  }
-}
-//mdui.alert(html);
-}
-  function do_login(){  
-  
-   var pwd=document.getElementById("pwd").value;  
-   if(pwd=="")
-   {
-     mdui.alert("请输入密码");
-   }else{
-     pd.open();
-     pwd=hex_md5(pwd);
-     //mdui.alert(pwd);
-     var form = document.createElement("form"); 
-     form.id = "login_form"; 
-     document.body.appendChild(form); 
-  // 创建一个输入 
-     var input = document.createElement("input"); 
-  // 设置相应参数 
-     input.type = "hidden"; 
-     input.name = "pwd"; 
-     input.value = pwd;
-  // 将该输入框插入到 form 中 
-     form.appendChild(input); 
-  // form 的提交方式 
-     form.method = "POST"; 
-  // form 提交路径 
-    form.action = "/dologin"; 
-    form.target="hidden_frame"
-  // 对该 form 执行提交 
-    form.submit();
-   }
-   
-  }  
- </script>  
+    <div>请稍候...</div>
+    <br />
+    <div class="mdui-progress">
+      <div class="mdui-progress-indeterminate"></div>
+    </div>
+  </div>
+  <script language="javascript">
+    var pd = new mdui.Dialog("#progressDialog", {
+      modal: true
+    });
+
+    function iframeLoad(iframe) {
+      var doc = iframe.contentWindow.document;
+      var html = doc.body.innerHTML;
+      if ((html.indexOf("ok") != -1) || (html.indexOf("no") != -1)) {
+
+        if (html.indexOf("no") != -1) {
+          pd.close();
+          mdui.alert("密码错误");
+        } else {
+          location.reload();
+        }
+      }
+    }
+
+    function do_login() {
+      var pwd = document.getElementById("pwd").value;
+      if (pwd == "") {
+        mdui.alert("请输入密码");
+      } else {
+        pd.open();
+        pwd = hex_md5(pwd);
+        var form = document.createElement("form");
+        form.id = "login_form";
+        document.body.appendChild(form);
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "pwd";
+        input.value = pwd;
+        form.appendChild(input);
+        form.method = "POST";
+        form.action = "/dologin";
+        form.target = "hidden_frame"
+        form.submit();
+      }
+
+    }
+  </script>
 </body>
+
 </html>
