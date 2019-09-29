@@ -16,6 +16,7 @@ import java.util.regex.*;
 import net.newlydev.fileshare_android.*;
 
 import org.apache.commons.fileupload.*;
+import org.json.JSONObject;
 
 import android.net.*;
 
@@ -273,43 +274,50 @@ public class HttpThread extends Thread {
                                 ctx.handler.post(new Runnable() {
                                     @Override
                                     public void run() {
-                                        AlertDialog.Builder ab = new AlertDialog.Builder(new ContextThemeWrapper(ctx, androidx.appcompat.R.style.Theme_AppCompat_Light));
-                                        ab.setCancelable(false);
-                                        ab.setTitle("FileShare");
-                                        ab.setMessage("下列用户请求您的权限来访问您的文件\nip地址:" + client.getInetAddress().toString());
-                                        ab.setPositiveButton("授权", new DialogInterface.OnClickListener() {
+                                        try {
+                                            AlertDialog.Builder ab = new AlertDialog.Builder(new ContextThemeWrapper(ctx, androidx.appcompat.R.style.Theme_AppCompat_Light));
+                                            ab.setCancelable(false);
+                                            ab.setTitle("FileShare");
+                                            ab.setMessage("下列用户请求您的权限来访问您的文件\nip地址:" + client.getInetAddress().toString());
+                                            ab.setPositiveButton("授权", new DialogInterface.OnClickListener() {
 
-                                            @Override
-                                            public void onClick(DialogInterface p1, int p2) {
-                                                premissiond = true;
-                                                synchronized (lock) {
-                                                    lock.notify();
+                                                @Override
+                                                public void onClick(DialogInterface p1, int p2) {
+                                                    premissiond = true;
+                                                    synchronized (lock) {
+                                                        lock.notify();
+                                                    }
                                                 }
-                                            }
-                                        });
-                                        ab.setNegativeButton("拒绝", new DialogInterface.OnClickListener() {
+                                            });
+                                            ab.setNegativeButton("拒绝", new DialogInterface.OnClickListener() {
 
-                                            @Override
-                                            public void onClick(DialogInterface p1, int p2) {
-                                                premissiond = false;
-                                                synchronized (lock) {
-                                                    lock.notify();
+                                                @Override
+                                                public void onClick(DialogInterface p1, int p2) {
+                                                    premissiond = false;
+                                                    synchronized (lock) {
+                                                        lock.notify();
+                                                    }
                                                 }
-                                            }
-                                        });
-                                        ab.setNeutralButton("拒绝并关闭服务器", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                premissiond = false;
-                                                synchronized (lock) {
-                                                    lock.notify();
+                                            });
+                                            ab.setNeutralButton("拒绝并关闭服务器", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    premissiond = false;
+                                                    synchronized (lock) {
+                                                        lock.notify();
+                                                    }
+                                                    ctx.stopSelf();
                                                 }
-                                                ctx.stopSelf();
-                                            }
-                                        });
-                                        AlertDialog dlg = ab.create();
-                                        dlg.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-                                        dlg.show();
+                                            });
+                                            AlertDialog dlg = ab.create();
+                                            dlg.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+                                            dlg.show();
+
+                                        }catch(Exception e)
+                                        {
+                                            e.printStackTrace();
+                                            premissiond=false;
+                                        }
                                     }
                                 });
                                 synchronized (lock) {
@@ -322,7 +330,6 @@ public class HttpThread extends Thread {
                                 if (premissiond) {
                                     content = "ok";
                                     String token = new Session(ctx).getToken();
-                                    //tokens.add(token);
                                     rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n\r\n";
                                 } else {
                                     rethead = rethead + "\r\n";
@@ -357,21 +364,21 @@ public class HttpThread extends Thread {
                     byte[] data = new byte[postlen];
                     sis.read(data);
                     String pwd_md5 = new String(data, "utf-8").split("=")[1];
-                    String content = "no";
+                    String content;
                     SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(ctx);
                     String real_pwd = p.getString("password", "null");
 
                     String rethead = "HTTP/1.0 200 OK \r\n" +
-                            "Content-Type: text/html; charset=UTF-8\r\n" +
-                            "Content-Length: " + content.getBytes("utf-8").length + "\r\n";
+                            "Content-Type: text/html; charset=UTF-8\r\n";
                     if (pwd_md5.equals(Utils.EncoderByMd5(real_pwd))) {
-                        content = "ok";
+                        content=new JSONObject().put("status",0).toString();
                         String token = new Session(ctx).getToken();
                         //tokens.add(token);
-                        rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n\r\n";
+                        rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n";
                     } else {
-                        rethead = rethead + "\r\n";
+                        content=new JSONObject().put("status",1).put("message","密码错误").toString();
                     }
+                    rethead=rethead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
                     sos.write(rethead.getBytes("utf-8"));
                     sos.write(content.getBytes("utf-8"));
                     sos.flush();
