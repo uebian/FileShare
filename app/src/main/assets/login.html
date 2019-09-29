@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/res/css/mdui.min.css" />
   <script src="/res/js/mdui.min.js"></script>
   <script src="/res/js/md5.js"></script>
+  <script src="/res/js/jquery.js"></script>
 </head>
 
 <body class=" mdui-theme-primary-indigo mdui-theme-accent-pink">
@@ -25,8 +26,6 @@
       <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme-accent" onclick="do_login();">登录</button>
     </div>
   </div>
-
-  <iframe name='hidden_frame' id="hidden_frame" style="display:none" onload="iframeLoad(this);"></iframe>
   <div class="mdui-dialog" id="progressDialog" style="padding:20px">
 
     <div>请稍候...</div>
@@ -41,16 +40,12 @@
     });
 
     function iframeLoad(iframe) {
-      var doc = iframe.contentWindow.document;
-      var html = doc.body.innerHTML;
-      if ((html.indexOf("ok") != -1) || (html.indexOf("no") != -1)) {
-
-        if (html.indexOf("no") != -1) {
-          pd.close();
-          mdui.alert("密码错误");
-        } else {
-          location.reload();
-        }
+      var result = JSON.parse(doc.body.innerHTML);
+      if (result.status == 0) {
+        location.reload();
+      } else {
+        pd.close();
+        mdui.alert(result.message);
       }
     }
 
@@ -61,20 +56,19 @@
       } else {
         pd.open();
         pwd = hex_md5(pwd);
-        var form = document.createElement("form");
-        form.id = "login_form";
-        document.body.appendChild(form);
-        var input = document.createElement("input");
-        input.type = "hidden";
-        input.name = "pwd";
-        input.value = pwd;
-        form.appendChild(input);
-        form.method = "POST";
-        form.action = "/dologin";
-        form.target = "hidden_frame"
-        form.submit();
+        $.post("/dologin", {
+            password: pwd
+          },
+          function(data, status) {
+            var result = JSON.parse(data);
+            if (result.status == 0) {
+              location.reload();
+            } else {
+              pd.close();
+              mdui.alert(result.message);
+            }
+          });
       }
-
     }
   </script>
 </body>
