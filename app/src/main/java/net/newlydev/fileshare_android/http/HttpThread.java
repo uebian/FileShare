@@ -168,7 +168,10 @@ public class HttpThread extends Thread {
                         } else {
                             throw new RuntimeException("已弃用");
                         }
-                    } else if (filename.startsWith("/root")) {
+                    }if (filename.equals("/logout")) {
+                        Session.sessions.remove(session);
+                        hr.sendResFile("refresh.html");
+                    }else if (filename.startsWith("/root")) {
                         String realPath = filename.substring("/root".length());
                         boolean error = false, isFile = false;
                         String body = "", tmpf = "";
