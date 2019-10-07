@@ -323,19 +323,20 @@ public class HttpThread extends Thread {
                                 synchronized (lock) {
                                     lock.wait();
                                 }
-                                String content = "no";
+                                String content;
                                 String rethead = "HTTP/1.0 200 OK \r\n" +
-                                        "Content-Type: text/html; charset=UTF-8\r\n" +
-                                        "Content-Length: " + content.getBytes("utf-8").length + "\r\n";
+                                        "Content-Type: text/html; charset=UTF-8\r\n";
                                 if (premissiond) {
-                                    content = "ok";
+                                    content=new JSONObject().put("status",0).toString();
                                     String token = new Session(ctx).getToken();
-                                    rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n\r\n";
+                                    rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n";
                                 } else {
-                                    rethead = rethead + "\r\n";
+                                    content=new JSONObject().put("status",1).put("message","请求被拒").toString();
                                 }
+                                rethead=rethead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
                                 sos.write(rethead.getBytes("utf-8"));
                                 sos.write(content.getBytes("utf-8"));
+                                sos.flush();
                             } else {
                                 InputStream is = ctx.getClassLoader().getResourceAsStream("assets/waitingforpermission.html");
                                 String rethead = "HTTP/1.0 200 OK \r\n" +

@@ -7,6 +7,7 @@
   <title>FileShare</title>
   <link rel="stylesheet" href="/res/css/mdui.min.css" />
   <script src="/res/js/mdui.min.js"></script>
+  <script src="/res/js/jquery.js"></script>
 </head>
 
 <body class="mdui-theme-primary-indigo mdui-theme-accent-pink mdui-appbar-with-toolbar">
@@ -18,22 +19,16 @@
   <div class="mdui-progress">
     <div class="mdui-progress-indeterminate"></div>
   </div>
-  <iframe src="/askpermission" style="display:none" onload="iframeLoad(this);"></iframe>
   <script language="javascript">
-    function iframeLoad(iframe) {
-      var doc = iframe.contentWindow.document;
-      var html = doc.body.innerHTML;
-      //alert(html);
-      if ((html.indexOf("ok") != -1) || (html.indexOf("no") != -1)) {
-        if (html.indexOf("no") != -1) {
-          mdui.alert("用户拒绝", function() {
-            window.close()
-          });
-        } else {
+    $.get("/askpermission",
+      function(data, status) {
+        var result = JSON.parse(data);
+        if (result.status == 0) {
           location.reload();
+        } else {
+          mdui.alert(result.message);
         }
-      }
-    }
+      });
   </script>
 </body>
 
