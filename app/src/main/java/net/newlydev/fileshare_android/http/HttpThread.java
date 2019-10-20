@@ -1,26 +1,37 @@
 package net.newlydev.fileshare_android.http;
 
-import android.content.*;
+import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.view.ContextThemeWrapper;
+import android.view.WindowManager;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.preference.*;
+import androidx.documentfile.provider.DocumentFile;
+import androidx.preference.PreferenceManager;
 
-import android.view.*;
+import net.newlydev.fileshare_android.Escape;
+import net.newlydev.fileshare_android.FastDocumentFile;
+import net.newlydev.fileshare_android.MainService;
+import net.newlydev.fileshare_android.Session;
+import net.newlydev.fileshare_android.Utils;
 
-import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.regex.*;
-
-import net.newlydev.fileshare_android.*;
-
-import org.apache.commons.fileupload.*;
+import org.apache.commons.fileupload.MultipartStream;
 import org.json.JSONObject;
 
-import android.net.*;
-
-import androidx.documentfile.provider.DocumentFile;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HttpThread extends Thread {
     private MainService ctx;
@@ -86,6 +97,42 @@ public class HttpThread extends Thread {
             if (isget) {
                 if (filename.startsWith("/res")) {
                     hr.sendResFile(filename);
+                } else if (filename.startsWith("/download")) {
+                    String downloadToken = filename.split("\\?")[1].split("=")[1];
+                    String downloadFilePath = Session.getRealPath(downloadToken);
+                    String downloadFileName = new File(downloadFilePath).getName();
+                    downloadFilePath = new File(downloadFilePath).getParent();
+                    if (fileSystemTypes.equals("api")) {
+                        DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null)));
+                        for (String dirname : downloadFilePath.split("/")) {
+                            if (!dirname.equals("")) {
+                                df = df.findFile(dirname);
+                            }
+                        }
+                        DocumentFile downloadfile = df.findFile(downloadFileName);
+                        InputStream bis = ctx.getContentResolver().openInputStream(downloadfile.getUri());
+                        long filesize = downloadfile.length();
+                        if (filesize == 0) {
+                            hr.sendErrorMsg("非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>");
+                        } else {
+                            String rethead = "HTTP/1.0 200 OK \r\n" +
+                                    "Content-Type: application/octet-stream; charset=UTF-8\r\n" +
+                                    "Content-Length: " + filesize + "\r\n" +
+                                    "Content-Disposition: attachment; filename=" + downloadFileName + "\r\n" +
+                                    "\r\n";
+                            sos.write(rethead.getBytes("UTF-8"));
+                            byte[] buffer = new byte[1024];
+                            int ch = bis.read(buffer);
+                            while (ch != -1) {
+                                sos.write(buffer, 0, ch);
+                                ch = bis.read(buffer, 0, 1024);
+                            }
+                            sos.flush();
+                            bis.close();
+                        }
+                    } else {
+                        throw new RuntimeException("已弃用");
+                    }
                 } else if (session != null) {
                     if (filename.startsWith("/getfiles")) {
                         session.enterDir(URLDecoder.decode(filename.split("\\?")[1].split("=")[1], "UTF-8"));
@@ -133,46 +180,18 @@ public class HttpThread extends Thread {
                         } else {
                             throw new RuntimeException("已弃用");
                         }
-                    } else if (filename.startsWith("/download")) {
-                        String filename_e=filename.split("\\?")[1].split("=")[1];
-                        String downloadname = Escape.unescape(filename_e);
-                        if (downloadname.indexOf("/") != -1) {
-                            hr.sendErrorMsg("因为安全问题，请求被阻止");
-                        } else if (fileSystemTypes.equals("api")) {
-                            DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null)));
-                            for (String dirname : session.getPath().split("/")) {
-                                if (!dirname.equals("")) {
-                                    df = df.findFile(dirname);
-                                }
-                            }
-                            DocumentFile downloadfile = df.findFile(downloadname);
-                            InputStream bis = ctx.getContentResolver().openInputStream(downloadfile.getUri());
-                            long filesize = downloadfile.length();
-                            if (filesize == 0) {
-                                hr.sendErrorMsg("非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>");
-                            } else {
-                                String rethead = "HTTP/1.0 200 OK \r\n" +
-                                        "Content-Type: application/octet-stream; charset=UTF-8\r\n" +
-                                        "Content-Length: " + filesize + "\r\n" +
-                                        "Content-Disposition: attachment; filename=" + downloadname + "\r\n" +
-                                        "\r\n";
-                                sos.write(rethead.getBytes("UTF-8"));
-                                byte[] buffer = new byte[1024];
-                                int ch = bis.read(buffer);
-                                while (ch != -1) {
-                                    sos.write(buffer, 0, ch);
-                                    ch = bis.read(buffer, 0, 1024);
-                                }
-                                sos.flush();
-                                bis.close();
-                            }
+                    } else if (filename.startsWith("/createDownloadLink")) {
+                        String downloadFileName = Escape.unescape(filename.split("\\?")[1].split("=")[1]);
+                        if (downloadFileName.indexOf("/") == -1) {
+                            String downloadToken = session.createDownloadToken(session.getPath() + downloadFileName);
+                            hr.sendContent(new JSONObject().put("status", 0).put("token", downloadToken).toString());
                         } else {
-                            throw new RuntimeException("已弃用");
+                            hr.sendContent(new JSONObject().put("status", 1).toString());
                         }
-                    }if (filename.equals("/logout")) {
+                    } else if (filename.equals("/logout")) {
                         Session.sessions.remove(session);
                         hr.sendResFile("refresh.html");
-                    }else if (filename.startsWith("/root")) {
+                    } else if (filename.startsWith("/root")) {
                         String realPath = filename.substring("/root".length());
                         boolean error = false, isFile = false;
                         String body = "", tmpf = "";
@@ -317,10 +336,9 @@ public class HttpThread extends Thread {
                                             dlg.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
                                             dlg.show();
 
-                                        }catch(Exception e)
-                                        {
+                                        } catch (Exception e) {
                                             e.printStackTrace();
-                                            premissiond=false;
+                                            premissiond = false;
                                         }
                                     }
                                 });
@@ -331,13 +349,13 @@ public class HttpThread extends Thread {
                                 String rethead = "HTTP/1.0 200 OK \r\n" +
                                         "Content-Type: text/html; charset=UTF-8\r\n";
                                 if (premissiond) {
-                                    content=new JSONObject().put("status",0).toString();
+                                    content = new JSONObject().put("status", 0).toString();
                                     String token = new Session(ctx).getToken();
                                     rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n";
                                 } else {
-                                    content=new JSONObject().put("status",1).put("message","请求被拒").toString();
+                                    content = new JSONObject().put("status", 1).put("message", "请求被拒").toString();
                                 }
-                                rethead=rethead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
+                                rethead = rethead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
                                 sos.write(rethead.getBytes("utf-8"));
                                 sos.write(content.getBytes("utf-8"));
                                 sos.flush();
@@ -376,14 +394,14 @@ public class HttpThread extends Thread {
                     String rethead = "HTTP/1.0 200 OK \r\n" +
                             "Content-Type: text/html; charset=UTF-8\r\n";
                     if (pwd_md5.equals(Utils.EncoderByMd5(real_pwd))) {
-                        content=new JSONObject().put("status",0).toString();
+                        content = new JSONObject().put("status", 0).toString();
                         String token = new Session(ctx).getToken();
                         //tokens.add(token);
                         rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n";
                     } else {
-                        content=new JSONObject().put("status",1).put("message","密码错误").toString();
+                        content = new JSONObject().put("status", 1).put("message", "密码错误").toString();
                     }
-                    rethead=rethead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
+                    rethead = rethead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
                     sos.write(rethead.getBytes("utf-8"));
                     sos.write(content.getBytes("utf-8"));
                     sos.flush();
@@ -391,8 +409,6 @@ public class HttpThread extends Thread {
                     Thread.sleep(100);
                     if (session == null) {
                         hr.sendErrorMsg("请先登录");
-                    } else if (!PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("allowUpload", false)) {
-                        hr.sendContent("服务器未开放上传");
                     } else {
                         String uploadfilename = null;
                         String boundary = contenttype.split("boundary=")[1];
@@ -402,13 +418,17 @@ public class HttpThread extends Thread {
                         if (matcher.matches()) {
                             uploadfilename = new File(matcher.group(1)).getName();
                         }
-                        if (fileSystemTypes.equals("api")) {
+                        if (!PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("allowUpload", false)) {
+                            Thread.sleep(500);
+                            hr.sendContent("服务器未开放上传");
+                        } else if (fileSystemTypes.equals("api")) {
                             DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null)));
                             for (String dirname : session.getPath().split("/")) {
                                 if (!dirname.equals("")) {
                                     df = df.findFile(dirname);
                                 }
                             }
+
                             if (df.findFile(uploadfilename) != null) {
                                 hr.sendContent("文件名重复，请更换后重试");
                             }
@@ -443,7 +463,8 @@ public class HttpThread extends Thread {
         }
         try {
             client.close();
-        } catch (IOException e) {
+        } catch (
+                IOException e) {
         }
     }
 }
