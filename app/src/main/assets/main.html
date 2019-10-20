@@ -170,7 +170,7 @@
           mdui.snackbar({
             message: '下载即将开始'
           });
-          location.href = "http://" + window.location.host + "/download?path=" + filename;
+          location.href = "http://" + window.location.host + "/download?path=" + escape(filename);
         }
         infobtn.onclick = function() {
           mdui.alert("开发中...")

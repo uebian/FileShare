@@ -134,7 +134,8 @@ public class HttpThread extends Thread {
                             throw new RuntimeException("已弃用");
                         }
                     } else if (filename.startsWith("/download")) {
-                        String downloadname = URLDecoder.decode(filename.split("\\?")[1].split("=")[1], "UTF-8");
+                        String filename_e=filename.split("\\?")[1].split("=")[1];
+                        String downloadname = Escape.unescape(filename_e);
                         if (downloadname.indexOf("/") != -1) {
                             hr.sendErrorMsg("因为安全问题，请求被阻止");
                         } else if (fileSystemTypes.equals("api")) {
