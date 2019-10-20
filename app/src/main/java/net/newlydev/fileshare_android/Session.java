@@ -4,7 +4,6 @@ import android.content.*;
 import androidx.preference.PreferenceManager;
 
 import java.util.*;
-//import org.apache.http.impl.io.*;
 
 public class Session
 {
@@ -12,6 +11,7 @@ public class Session
 	private String token;
 	private String path;
 	private String rootpath;
+	private static HashMap<String,String> downloadLinks=new HashMap<String, String>();
 	public Session(Context ctx)
 	{
 		token = Utils.getRandomString(32);
@@ -71,5 +71,17 @@ public class Session
 			}
 		}
 		return null;
+	}
+
+	public String createDownloadToken(String filePath)
+	{
+		String downloadToken=token+Utils.getRandomString(32);
+		downloadLinks.put(downloadToken,filePath);
+		return downloadToken;
+	}
+
+	public static String getRealPath(String downloadToken)
+	{
+		return downloadLinks.get(downloadToken);
 	}
 }

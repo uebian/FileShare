@@ -2,47 +2,56 @@
 <html lang="zh-cmn-Hans">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no" />
-  <title>FileShare</title>
-  <link rel="stylesheet" href="/res/css/mdui.min.css" />
-  <script src="/res/js/mdui.min.js"></script>
-  <script src="/res/js/download.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0,maximum-scale=1.0, user-scalable=no"/>
+    <title>FileShare</title>
+    <link rel="stylesheet" href="/res/css/mdui.min.css"/>
+    <script src="/res/js/mdui.min.js"></script>
+    <script src="/res/js/download.js"></script>
+    <script src="/res/js/jquery.js"></script>
 </head>
 
 <body class="mdui-theme-primary-indigo mdui-theme-accent-pink mdui-appbar-with-toolbar">
-  <!-- appbar -->
-  <div class="mdui-appbar mdui-appbar-fixed">
+<!-- appbar -->
+<div class="mdui-appbar mdui-appbar-fixed">
     <div class="mdui-toolbar mdui-color-theme">
-      <a class="mdui-typo-headline">FileShare</a>
-      <div class="mdui-toolbar-spacer"></div>
-      <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-menu="{target: '#mainmenu'}"><i class="mdui-icon material-icons">more_vert</i></a>
-      <ul class="mdui-menu" id="mainmenu">
-        <li class="mdui-menu-item">
-          <a href="/logout" class="mdui-ripple">退出登录</a>
-          <a href="/res/html/about.html" class="mdui-ripple">关于FileShare</a>
-        </li>
-      </ul>
+        <a class="mdui-typo-headline">FileShare</a>
+        <div class="mdui-toolbar-spacer"></div>
+        <a href="javascript:;" class="mdui-btn mdui-btn-icon" mdui-menu="{target: '#mainmenu'}"><i
+                class="mdui-icon material-icons">more_vert</i></a>
+        <ul class="mdui-menu" id="mainmenu">
+            <li class="mdui-menu-item">
+                <a href="/logout" class="mdui-ripple">退出登录</a>
+                <a href="/res/html/about.html" class="mdui-ripple">关于FileShare</a>
+            </li>
+        </ul>
     </div>
-  </div>
-  <iframe name='hidden_frame' id="hidden_frame" style="display:none" onload="iframeLoad(this);"></iframe>
-  <iframe name='hidden_frame_fileupload' id="hidden_frame_fileupload" style="display:none" onload="uploadfinish(this);"></iframe>
-  <ul class="mdui-list" id="filelist">
-  </ul>
-  <div class="mdui-dialog" id="progressDialog" style="padding:20px">
+</div>
+<iframe name='hidden_frame' id="hidden_frame" style="display:none"
+        onload="iframeLoad(this);"></iframe>
+<iframe name='hidden_frame_fileupload' id="hidden_frame_fileupload" style="display:none"
+        onload="uploadfinish(this);"></iframe>
+<ul class="mdui-list" id="filelist">
+</ul>
+<div class="mdui-dialog" id="progressDialog" style="padding:20px">
 
     <div>请稍候...</div>
-    <br />
+    <br/>
     <div class="mdui-progress">
-      <div class="mdui-progress-indeterminate"></div>
+        <div class="mdui-progress-indeterminate"></div>
     </div>
-  </div>
-  <form method="POST" target="hidden_frame_fileupload" id="form_upload" action="upload" enctype="multipart/form-data">
-    <input onchange="doupload();" type="file" name="uploadfile" id="file_upload" style="display:none">
-    <input type="submit" id="file_submit" style="display:none" />
-  </form>
-  <button class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent" onclick="document.getElementById('file_upload').click();"><i class="mdui-icon material-icons">file_upload</i></button>
-  <script language="javascript">
+</div>
+<form method="POST" target="hidden_frame_fileupload" id="form_upload" action="upload"
+      enctype="multipart/form-data">
+    <input onchange="doupload();" type="file" name="uploadfile" id="file_upload"
+           style="display:none">
+    <input type="submit" id="file_submit" style="display:none"/>
+</form>
+<button class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"
+        onclick="document.getElementById('file_upload').click();"><i
+        class="mdui-icon material-icons">file_upload</i></button>
+<script language="javascript">
     var pd = new mdui.Dialog("#progressDialog", {
       modal: true
     });
@@ -170,7 +179,14 @@
           mdui.snackbar({
             message: '下载即将开始'
           });
-          location.href = "http://" + window.location.host + "/download?path=" + escape(filename);
+          $.get("/createDownloadLink?filename="+escape(filename),function(data, status) {
+            var result = JSON.parse(data);
+            if (result.status == 0) {
+              location.href = "http://" + window.location.host + "/download?path=" + result.token;
+            } else {
+              mdui.alert("无法下载");
+            }
+          });
         }
         infobtn.onclick = function() {
           mdui.alert("开发中...")
@@ -226,7 +242,10 @@
     } catch (err) {
       alert(err);
     }
-  </script>
+
+
+
+</script>
 </body>
 
 </html>
