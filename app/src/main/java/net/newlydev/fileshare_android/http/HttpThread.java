@@ -10,7 +10,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
-import net.newlydev.fileshare_android.Escape;
 import net.newlydev.fileshare_android.FastDocumentFile;
 import net.newlydev.fileshare_android.MainService;
 import net.newlydev.fileshare_android.Session;
@@ -181,7 +180,7 @@ public class HttpThread extends Thread {
                             throw new RuntimeException("已弃用");
                         }
                     } else if (filename.startsWith("/createDownloadLink")) {
-                        String downloadFileName = Escape.unescape(filename.split("\\?")[1].split("=")[1]);
+                        String downloadFileName = URLDecoder.decode(filename.split("\\?")[1].split("=")[1]);
                         if (downloadFileName.indexOf("/") == -1) {
                             String downloadToken = session.createDownloadToken(session.getPath() + downloadFileName);
                             hr.sendContent(new JSONObject().put("status", 0).put("token", downloadToken).toString());

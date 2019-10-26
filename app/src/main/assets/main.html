@@ -179,7 +179,7 @@
           mdui.snackbar({
             message: '下载即将开始'
           });
-          $.get("/createDownloadLink?filename="+escape(filename),function(data, status) {
+          $.get("/createDownloadLink?filename="+encodeURIComponent(filename),function(data, status) {
             var result = JSON.parse(data);
             if (result.status == 0) {
               location.href = "http://" + window.location.host + "/download?path=" + result.token;
@@ -242,6 +242,7 @@
     } catch (err) {
       alert(err);
     }
+
 
 
 
