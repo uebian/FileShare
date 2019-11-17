@@ -60,7 +60,7 @@ public class MainService extends Service
 		builder= new NotificationCompat.Builder(this,"0");
 		builder.setContentTitle("文件共享服务运行中");
 		builder.setContentText("点击管理");
-		builder.setSmallIcon(R.drawable.ic_launcher);
+		builder.setSmallIcon(R.mipmap.ic_launcher);
 		builder.setOngoing(true);
 		builder.setContentIntent(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),0));
 	}
