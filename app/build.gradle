@@ -7,8 +7,8 @@ android {
         applicationId "net.newlydev.fileshare_android"
         minSdkVersion 14
         targetSdkVersion 29
-        versionCode 7
-        versionName "1.7"
+        versionCode 8
+        versionName "1.8"
     }
     buildTypes {
         release {
