@@ -47,7 +47,7 @@ public class Session
 				return;
 			}
 			//----/sdcard/abc/
-			String paths[]=path.split("/");
+			String[] paths = path.split("/");
 			//alert(paths)
 			path = "/";
 			for (int i=1;i < paths.length - 1;i++)

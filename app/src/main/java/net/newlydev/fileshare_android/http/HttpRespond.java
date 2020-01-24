@@ -40,12 +40,13 @@ public class HttpRespond {
     }
 
     public void sendErrorMsg(String msgHtml) throws IOException {
-        String body = "", tmp = "";
+        StringBuilder sb=new StringBuilder();
+        String tmp;
         BufferedReader is = new BufferedReader(new InputStreamReader(ctx.getAssets().open("error.html"), "UTF-8"));
         while ((tmp = is.readLine()) != null) {
-            body = body + tmp + "\n";
+            sb.append(tmp + "\n");
         }
-        body = body.replaceFirst("contentarea", msgHtml);
+        String body=sb.toString().replaceFirst("contentarea",msgHtml);
         String rethead = "HTTP/1.0 200 OK \r\n" +
                 "Content-Type: text/html; charset=UTF-8\r\n" +
                 "Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +

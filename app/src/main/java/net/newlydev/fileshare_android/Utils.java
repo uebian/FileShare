@@ -2,12 +2,9 @@ package net.newlydev.fileshare_android;
 
 import android.app.*;
 import android.content.*;
-import android.net.wifi.*;
-import java.io.*;
 import java.net.*;
 import java.security.*;
 import java.util.*;
-import android.net.*;
 
 public class Utils
 {
@@ -23,9 +20,9 @@ public class Utils
 		{".png", "image/png"},
 		{".js", "application/x-javascript"},
 	};
-	static HashMap<String,String> mimeMapKeyIsContentType = null;
-	static HashMap<String,String> mimeMapKeyIsExpands = null;
-	public static HashMap<String,String> CreateMIMEMapKeyIsContentType(){
+	private static HashMap<String,String> mimeMapKeyIsContentType = null;
+	private static HashMap<String,String> mimeMapKeyIsExpands = null;
+	private static HashMap<String,String> CreateMIMEMapKeyIsContentType(){
 
 		HashMap<String,String> mimeHashMap = new HashMap<String,String>();
 
@@ -155,15 +152,14 @@ public class Utils
 			switch(number){
 				case 0:
 					result=Math.round(Math.random()*25+65);
-					sb.append(String.valueOf((char)result));
+					sb.append((char) result);
 					break;
 				case 1:
 					result=Math.round(Math.random()*25+97);
-					sb.append(String.valueOf((char)result));
+					sb.append((char) result);
 					break;
 				case 2:
-					sb.append(String.valueOf
-							  (new Random().nextInt(10)));
+					sb.append(new Random().nextInt(10));
 					break; 
 			}
 		}
