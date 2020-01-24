@@ -32,7 +32,7 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class HttpThread extends Thread {
+public class HttpThread implements Runnable {
     private MainService ctx;
     private Socket client;
     private DataInputStream sis;

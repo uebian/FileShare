@@ -6,14 +6,18 @@ import androidx.core.app.*;
 import androidx.preference.*;
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import net.newlydev.fileshare_android.activities.*;
 import net.newlydev.fileshare_android.http.*;
 
 public class MainService extends Service
 {
+	private static ExecutorService mainThreadPool= Executors.newCachedThreadPool();
 	public Handler handler=new Handler();
-	NotificationCompat.Builder builder;
-	ServerSocket ss;
+	private NotificationCompat.Builder builder;
+	private ServerSocket ss;
 	private boolean running=false;
 	private String errorstr="";
 	public boolean started=false;
@@ -37,7 +41,7 @@ public class MainService extends Service
 				try
 				{
 					Socket client=ss.accept();
-					new HttpThread(client,MainService.this).start();
+					mainThreadPool.submit(new HttpThread(client,MainService.this));
 				}
 				catch (IOException e)
 				{
