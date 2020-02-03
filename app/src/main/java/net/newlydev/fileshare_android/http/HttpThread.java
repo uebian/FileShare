@@ -16,6 +16,7 @@ import net.newlydev.fileshare_android.Session;
 import net.newlydev.fileshare_android.Utils;
 
 import org.apache.commons.fileupload.MultipartStream;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.DataInputStream;
@@ -26,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -117,14 +119,14 @@ public class HttpThread implements Runnable {
                             String rethead = "HTTP/1.0 200 OK \r\n" +
                                     "Content-Type: application/octet-stream; charset=UTF-8\r\n" +
                                     "Content-Length: " + filesize + "\r\n" +
-                                    "Content-Disposition: attachment; filename=" + downloadFileName + "\r\n" +
+                                    "Content-Disposition: attachment; filename=" + URLEncoder.encode(downloadFileName) + "\r\n" +
                                     "\r\n";
                             sos.write(rethead.getBytes("UTF-8"));
-                            byte[] buffer = new byte[1024];
+                            byte[] buffer = new byte[2048];
                             int ch = bis.read(buffer);
                             while (ch != -1) {
                                 sos.write(buffer, 0, ch);
-                                ch = bis.read(buffer, 0, 1024);
+                                ch = bis.read(buffer, 0, 2048);
                             }
                             sos.flush();
                             bis.close();
@@ -135,12 +137,13 @@ public class HttpThread implements Runnable {
                 } else if (session != null) {
                     if (filename.startsWith("/getfiles")) {
                         session.enterDir(URLDecoder.decode(filename.split("\\?")[1].split("=")[1], "UTF-8"));
-                        String body = "", tmpf = "";
-                        int dirlen = 0;
+                        JSONArray filesJsonObject = new JSONArray();
+                        JSONArray dirJsonObject = new JSONArray();
+                        dirJsonObject.put("..");
                         if (fileSystemTypes.equals("api")) {
                             String rootPath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null);
                             if (rootPath == null) {
-                                hr.sendContent("no 起始路径未配置，请在开服端FileShare应用上设置");
+                                hr.sendContent(new JSONObject().put("status", 1).put("message", "起始路径未配置，请在开服端FileShare应用上设置").toString());
                             } else {
                                 DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(rootPath));
                                 for (String dirname : session.getPath().split("/")) {
@@ -150,7 +153,7 @@ public class HttpThread implements Runnable {
                                 }
                                 ArrayList<FastDocumentFile> files = new ArrayList<FastDocumentFile>();
                                 if (!df.canRead()) {
-                                    hr.sendContent("no 起始路径获取失败，可能是授权已失效。请在FileShare应用中重新配置");
+                                    hr.sendContent(new JSONObject().put("status", 1).put("message", "起始路径获取失败，可能是授权已失效。请在FileShare应用中重新配置").toString());
                                 } else {
                                     for (DocumentFile tdf : df.listFiles()) {
                                         files.add(new FastDocumentFile(tdf));
@@ -162,18 +165,18 @@ public class HttpThread implements Runnable {
                                             return p1.getName().compareTo(p2.getName());
                                         }
                                     });
-                                    body = body + "\n..";
-                                    dirlen++;
                                     for (FastDocumentFile file : files) {
                                         if (file.getDocumentFile().isDirectory()) {
-                                            dirlen++;
-                                            body = body + "\n" + file.getName();
+                                            dirJsonObject.put(file.getName());
                                         } else {
-                                            tmpf = tmpf + "\n" + file.getName();
+                                            filesJsonObject.put(file.getName());
                                         }
                                     }
-                                    body = "ok " + dirlen + body + tmpf;
-                                    hr.sendContent(body);
+                                    JSONObject resultJsonObject = new JSONObject();
+                                    resultJsonObject.put("status", 0);
+                                    resultJsonObject.put("dir", dirJsonObject);
+                                    resultJsonObject.put("files", filesJsonObject);
+                                    hr.sendContent(resultJsonObject.toString());
                                 }
                             }
                         } else {
@@ -405,10 +408,10 @@ public class HttpThread implements Runnable {
                     sos.write(content.getBytes("utf-8"));
                     sos.flush();
                 } else if (filename.startsWith("/upload")) {
-                    Thread.sleep(100);
                     if (session == null) {
                         hr.sendErrorMsg("请先登录");
                     } else {
+                        long startTime=System.currentTimeMillis();
                         String uploadfilename = null;
                         String boundary = contenttype.split("boundary=")[1];
                         MultipartStream ms = new MultipartStream(sis, boundary.getBytes("utf-8"));
@@ -419,7 +422,7 @@ public class HttpThread implements Runnable {
                         }
                         if (!PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("allowUpload", false)) {
                             Thread.sleep(500);
-                            hr.sendContent("服务器未开放上传");
+                            hr.sendContent(new JSONObject().put("status",1).put("message","服务器未开放上传，请在开服端FileShare应用上配置").toString());
                         } else if (fileSystemTypes.equals("api")) {
                             DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null)));
                             for (String dirname : session.getPath().split("/")) {
@@ -427,30 +430,24 @@ public class HttpThread implements Runnable {
                                     df = df.findFile(dirname);
                                 }
                             }
-
                             if (df.findFile(uploadfilename) != null) {
-                                hr.sendContent("文件名重复，请更换后重试");
+                                hr.sendContent(new JSONObject().put("status",1).put("message","文件名重复，请更换后重试").toString());
+                            }else {
+                                DocumentFile uploadcf = df.createFile("application/octet-stream", uploadfilename);
+                                OutputStream fos = ctx.getContentResolver().openOutputStream(uploadcf.getUri());
+                                ms.readBodyData(fos);
+                                JSONObject result = new JSONObject();
+                                result.put("status", 0);
+                                result.put("time", System.currentTimeMillis() - startTime);
+                                byte[] body = result.toString().getBytes("UTF-8");
+                                String rethead = "HTTP/1.0 200 OK \r\n" +
+                                        "Content-Type: text/html; charset=UTF-8\r\n" +
+                                        "Content-Length: " + body.length + "\r\n" +
+                                        "\r\n";
+                                sos.write(rethead.getBytes("UTF-8"));
+                                sos.write(body);
+                                sos.flush();
                             }
-                            DocumentFile uploadcf = df.createFile("application/octet-stream", uploadfilename);
-                            OutputStream fos = ctx.getContentResolver().openOutputStream(uploadcf.getUri());
-                            InputStream is = ms.newInputStream();
-                            byte[] buffer = new byte[1024];
-                            int ch = is.read(buffer);
-                            while (ch != -1) {
-                                fos.write(buffer, 0, ch);
-                                ch = is.read(buffer, 0, 1024);
-                            }
-                            sos.flush();
-                            fos.close();
-                            is.close();
-                            byte[] body = "ok".getBytes("UTF-8");
-                            String rethead = "HTTP/1.0 200 OK \r\n" +
-                                    "Content-Type: text/html; charset=UTF-8\r\n" +
-                                    "Content-Length: " + body.length + "\r\n" +
-                                    "\r\n";
-                            sos.write(rethead.getBytes("UTF-8"));
-                            sos.write(body);
-                            sos.flush();
                         } else {
                             throw new RuntimeException("已弃用");
                         }
@@ -462,8 +459,7 @@ public class HttpThread implements Runnable {
         }
         try {
             client.close();
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
         }
     }
 }

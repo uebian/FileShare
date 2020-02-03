@@ -28,7 +28,7 @@ public class MainActivity extends mActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		AdView adview=(AdView) findViewById(R.id.adView);
-		AdRequest adRequest=new AdRequest.Builder().addTestDevice("27E31343F422BD0D601A6F9D3D438A95").build();
+		AdRequest adRequest=new AdRequest.Builder().build();
         adview.loadAd(adRequest);
 		final Fragment statusFragment=new MainFragment();
 		final Fragment aboutFragment=new AboutFragment();
