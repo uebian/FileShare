@@ -28,10 +28,6 @@
         </ul>
     </div>
 </div>
-<iframe name='hidden_frame' id="hidden_frame" style="display:none"
-        onload="iframeLoad(this);"></iframe>
-<iframe name='hidden_frame_fileupload' id="hidden_frame_fileupload" style="display:none"
-        onload="uploadfinish(this);"></iframe>
 <ul class="mdui-list" id="filelist">
 </ul>
 <div class="mdui-dialog" id="progressDialog" style="padding:20px">
@@ -42,11 +38,20 @@
         <div class="mdui-progress-indeterminate"></div>
     </div>
 </div>
+<div class="mdui-dialog" id="upload_progressDialog" style="padding:20px">
+
+    <div>请稍候...</div>
+    <br />
+    <div class="mdui-progress">
+        <div name="upload-progress" id="upload-progress" class="mdui-progress-determinate"></div>
+    </div>
+    <div name="upload-info" id="upload-info">
+    </div>
+</div>
 <form method="POST" target="hidden_frame_fileupload" id="form_upload" action="upload"
       enctype="multipart/form-data">
     <input onchange="doupload();" type="file" name="uploadfile" id="file_upload"
            style="display:none">
-    <input type="submit" id="file_submit" style="display:none"/>
 </form>
 <button class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"
         onclick="document.getElementById('file_upload').click();"><i
@@ -55,24 +60,84 @@
     var pd = new mdui.Dialog("#progressDialog", {
       modal: true
     });
+    var upload_pd = new mdui.Dialog("#upload_progressDialog", {
+      modal: true
+    });
     var need = false;
     var needupload = false;
     var items = new Array();
 
     function dogetfiles(fname) {
-      need = true;
-      var iframe = document.getElementById("hidden_frame");
-      iframe.setAttribute("src", "/getfiles?path=" + fname, 0);
+      $.get("/getfiles?path=" + fname,
+        function(data, status) {
+          var result = JSON.parse(data);
+          if (result.status == 0) {
+            for (var i = 0; i < result.dir.length; i++) {
+              addfile(result.dir[i], true);
+            }
+            for (var i = 0; i < result.files.length; i++) {
+              addfile(result.files[i], false);
+            }
+          }else{
+            mdui.alert(result.message, function() {
+                  window.setTimeout(function() {
+                    dogetfiles("..");
+                  }, 10);
+                });
+          }
+          pd.close();
+        });
     }
 
     function doupload() {
       try {
-        pd.open();
+        upload_pd.open();
+        lastUpload = 0;
+        lastUploadTime = (new Date()).getTime();
         var sub = document.getElementById("file_submit");
-        needupload = true;
-        sub.click()
+        var filearea = document.getElementById("file_upload");
+        var fs = filearea.files[0];
+        var fd = new FormData();
+        fd.append("file_upload", document.getElementById('file_upload').files[0]);
+        var xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", uploadProgress, false);
+        xhr.open("POST", "upload");
+        xhr.onreadystatechange = function() {
+          try {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+              upload_pd.close();
+              var result = JSON.parse(xhr.responseText);
+              if (result.status == 0) {
+                mdui.alert("上传成功,耗时" + result.time + "ms", function() {
+                  window.setTimeout(function() {
+                    window.location.reload();
+                  }, 10);
+                });
+              } else {
+                mdui.alert(xhr.responseText.message, function() {
+                  window.setTimeout(function() {
+                    window.location.reload();
+                  }, 10);
+                });
+              }
+            }
+          } catch (e) {
+            alert(e)
+          }
+        }
+        xhr.send(fd);
       } catch (e) {
         alert(e)
+      }
+    }
+
+    function uploadProgress(evt) {
+      if (evt.lengthComputable) {
+        var percentComplete = Math.round((evt.loaded) * 100 / evt.total);
+        $("#upload-info").html("进度:" + percentComplete + "%,实时速度:" + (evt.loaded - lastUpload) / 8 / 1024 / 1024 / (((new Date()).getTime() - lastUploadTime) / 1000) + "M/s");
+        $("#upload-progress").css("width", "" + percentComplete + "%");
+        lastUploadTime = (new Date()).getTime();
+        lastUpload = evt.loaded;
       }
     }
 
@@ -206,35 +271,6 @@
         return n;
       }
       return false;
-    }
-
-    function iframeLoad(iframe) {
-      if (need) {
-        need = false;
-        try {
-          var doc = iframe.contentWindow.document;
-          var html = doc.body.innerHTML;
-          //alert(html);
-          var files = html.split("\n");
-          if (files[0].split(" ")[0] == "ok") {
-            var dirlen = parseInt(files[0].split(" ")[1]);
-            var len = count(files);
-            for (var i = 1; i <= dirlen; i++) {
-              addfile(files[i], true);
-            }
-            for (var i = dirlen + 1; i < len; i++) {
-              addfile(files[i], false);
-            }
-          } else {
-            mdui.alert("错误:不能列出文件：" + files[0].split(" ")[1] + "如果您在多次点击确定后仍有这样的提示，请联系开服端在FileShare的APP上修改起始路径。", function() {
-              location.reload()
-            });
-          }
-          pd.close();
-        } catch (err) {
-          alert(err);
-        }
-      }
     }
 
     try {
