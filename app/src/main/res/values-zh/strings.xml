@@ -3,4 +3,5 @@
     <string name="app_name">FileShare</string>
     <string name="close">关闭</string>
     <string name="open">打开</string>
+    <string name="info">开源的使用http协议的文件传送软件</string>
 </resources>

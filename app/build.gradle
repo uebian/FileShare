@@ -7,8 +7,8 @@ android {
         applicationId "net.newlydev.fileshare_android"
         minSdkVersion 14
         targetSdkVersion 29
-        versionCode 9
-        versionName "1.9"
+        versionCode 10
+        versionName '2.0'
         multiDexEnabled = true
     }
     buildTypes {
@@ -27,9 +27,9 @@ android {
 
 dependencies {
     implementation 'com.google.android.material:material:1.0.0'
-	implementation 'com.google.android.gms:play-services-ads:18.3.0'
+    implementation 'com.google.android.gms:play-services-ads:18.3.0'
 	implementation 'androidx.preference:preference:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'
-	implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
 }
