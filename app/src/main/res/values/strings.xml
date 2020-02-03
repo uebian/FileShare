@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">FileShare</string>
-    <string name="open">打开</string>
-	<string name="close">关闭</string>
+    <string name="open">Open</string>
+	<string name="close">Close</string>
 
 </resources>

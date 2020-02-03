@@ -67,8 +67,7 @@ public class Utils
 		if(lastIndexOfDot < 0){
 			return "";//没有拓展名
 		}
-		String extension = fileName.substring(lastIndexOfDot+1);
-		return extension;
+		return fileName.substring(lastIndexOfDot+1);
 	}
 //创建以拓展名为key值的HashMap
 	public static HashMap<String,String> CreateMIMEMapKeyIsExpands(){
@@ -138,8 +137,7 @@ public class Utils
 		char[] ob = new char[2];
 		ob[0] = Digit[(ib >>> 4) & 0X0F];
 		ob[1] = Digit[ib & 0X0F];
-		String s = new String(ob);
-		return s;
+		return new String(ob);
 	}
 
 	//产生随机字符串
@@ -148,7 +146,7 @@ public class Utils
 		StringBuffer sb=new StringBuffer();
 		for(int i=0; i<length; i++){
 			int number=random.nextInt(3);
-			long result=0;
+			long result;
 			switch(number){
 				case 0:
 					result=Math.round(Math.random()*25+65);

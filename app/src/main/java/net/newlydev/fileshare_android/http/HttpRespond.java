@@ -44,7 +44,7 @@ public class HttpRespond {
         String tmp;
         BufferedReader is = new BufferedReader(new InputStreamReader(ctx.getAssets().open("error.html"), "UTF-8"));
         while ((tmp = is.readLine()) != null) {
-            sb.append(tmp + "\n");
+            sb.append(tmp).append("\n");
         }
         String body=sb.toString().replaceFirst("contentarea",msgHtml);
         String rethead = "HTTP/1.0 200 OK \r\n" +
