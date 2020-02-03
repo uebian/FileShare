@@ -421,7 +421,7 @@ public class HttpThread implements Runnable {
                             uploadfilename = new File(matcher.group(1)).getName();
                         }
                         if (!PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("allowUpload", false)) {
-                            Thread.sleep(500);
+                            ms.discardBodyData();
                             hr.sendContent(new JSONObject().put("status",1).put("message","服务器未开放上传，请在开服端FileShare应用上配置").toString());
                         } else if (fileSystemTypes.equals("api")) {
                             DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null)));
@@ -431,6 +431,7 @@ public class HttpThread implements Runnable {
                                 }
                             }
                             if (df.findFile(uploadfilename) != null) {
+                                ms.discardBodyData();
                                 hr.sendContent(new JSONObject().put("status",1).put("message","文件名重复，请更换后重试").toString());
                             }else {
                                 DocumentFile uploadcf = df.createFile("application/octet-stream", uploadfilename);
