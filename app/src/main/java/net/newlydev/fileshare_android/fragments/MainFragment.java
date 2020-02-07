@@ -49,13 +49,13 @@ public class MainFragment extends Fragment
 						String ip=Utils.getLocalIpAddress();
 						if (ip.equals("0"))
 						{
-							ip_tv.setText("您的设备似乎没有有效的ipv4连接，请连接WiFi或打开WiFi热点后点本段文字重试\n我们暂不支持ipv6连接");
+							ip_tv.setText(getString(R.string.no_internet));
 							QRCode.setVisibility(View.GONE);
 						}
 						else
 						{
 							String url="http://" + ip + ":" + PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("serverPort", "-1");
-							ip_tv.setText("与您处于同一局域网(热点)的用户无需流量无需安装客户端即可通过访问" + url + "或扫描下方二维码访问您共享的文件(网络状态更改时请点击本文字来刷新)");
+							ip_tv.setText(String.format(getString(R.string.server_started),url));
 							Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
 							hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
 							//图像数据转换，使用了矩阵转换
@@ -88,13 +88,13 @@ public class MainFragment extends Fragment
 							catch (Exception e)
 							{
 								e.printStackTrace();
-								ip_tv.setText(String.format(getResources().getString(R.string.genqr_fail),url));
+								ip_tv.setText(String.format(getString(R.string.genqr_fail),url));
 							}
 						}
 					}
 					else
 					{
-						ip_tv.setText("服务未开启");
+						ip_tv.setText(getText(R.string.server_stopped));
 						QRCode.setVisibility(View.GONE);
 					}
 				}
