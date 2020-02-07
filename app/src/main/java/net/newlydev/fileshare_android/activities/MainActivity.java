@@ -27,7 +27,7 @@ public class MainActivity extends mActivity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		AdView adview=(AdView) findViewById(R.id.adView);
+		AdView adview= findViewById(R.id.adView);
 		AdRequest adRequest=new AdRequest.Builder().build();
         adview.loadAd(adRequest);
 		final Fragment statusFragment=new MainFragment();
@@ -35,9 +35,9 @@ public class MainActivity extends mActivity
 		final Fragment settingFragment=new SettingFragment();
 		final FragmentManager fragmentManager = getSupportFragmentManager();
 		waiting = false;
-		Toolbar toolbar=(Toolbar) findViewById(R.id.toolbar_normal);
-		lv = (ListView) findViewById(R.id.activity_main_list);
-		pb = (ProgressBar) findViewById(R.id.activity_main_waitingprogressbar);
+		Toolbar toolbar= findViewById(R.id.toolbar_normal);
+		lv = findViewById(R.id.activity_main_list);
+		pb = findViewById(R.id.activity_main_waitingprogressbar);
 		pb.setVisibility(View.GONE);
 		ArrayAdapter<String> aa=new ArrayAdapter<String>(this, R.layout.list_text);
 		aa.add("首页");
@@ -97,7 +97,7 @@ public class MainActivity extends mActivity
 			fragmentManager.beginTransaction().replace(R.id.activity_main_content, statusFragment).commit();
 			lv.setItemChecked(0, true);
 		}
-		final DrawerLayout mDrawerLayout=(DrawerLayout) findViewById(R.id.activity_main_dl);
+		final DrawerLayout mDrawerLayout= findViewById(R.id.activity_main_dl);
 		ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open, R.string.close) {
 			@Override
 			public void onDrawerOpened(View drawerView)

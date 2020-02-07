@@ -14,7 +14,7 @@
 		<Switch
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
-			android:text="启动服务"
+			android:text="@string/start_server"
 			android:id="@+id/fragment_status_switch"/>
 
 	</LinearLayout>

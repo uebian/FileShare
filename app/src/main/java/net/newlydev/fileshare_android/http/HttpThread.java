@@ -184,7 +184,7 @@ public class HttpThread implements Runnable {
                         }
                     } else if (filename.startsWith("/createDownloadLink")) {
                         String downloadFileName = URLDecoder.decode(filename.split("\\?")[1].split("=")[1]);
-                        if (downloadFileName.indexOf("/") == -1) {
+                        if (!downloadFileName.contains("/")) {
                             String downloadToken = session.createDownloadToken(session.getPath() + downloadFileName);
                             hr.sendContent(new JSONObject().put("status", 0).put("token", downloadToken).toString());
                         } else {

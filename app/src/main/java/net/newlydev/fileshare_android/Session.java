@@ -36,7 +36,7 @@ public class Session
 	}
 	public void enterDir(String name)
 	{
-		if(name.indexOf("/")!=-1||name.equals("."))
+		if(name.contains("/") ||name.equals("."))
 		{
 			return;
 		}

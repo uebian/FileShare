@@ -5,5 +5,8 @@
     <string name="open">Open</string>
 	<string name="close">Close</string>
     <string name="info">开源的使用http协议的文件传送软件</string>
+    <string name="source_code">Source Code</string>
+    <string name="start_server">Start Server</string>
+    <string name="genqr_fail">无法生成二维码，点我重试。也可以通过访问%s访问您共享的文件。</string>
 
 </resources>

@@ -20,12 +20,12 @@ public class SettingFragment extends PreferenceFragmentCompat
 	public void onCreatePreferences(Bundle p1, String p2)
 	{
 		addPreferencesFromResource(R.xml.setting_preference);
-		final ListPreference filesystem=(ListPreference) findPreference("fileSystem");
-		final ListPreference lp=(ListPreference) findPreference("authType");
-		final EditTextPreference rootPath=(EditTextPreference) findPreference("rootPath");
-		final EditTextPreference pwd=(EditTextPreference) findPreference("password");
+		final ListPreference filesystem= findPreference("fileSystem");
+		final ListPreference lp= findPreference("authType");
+		final EditTextPreference rootPath= findPreference("rootPath");
+		final EditTextPreference pwd= findPreference("password");
 		final Preference getPath=findPreference("getPath");
-		final EditTextPreference serverPort=(EditTextPreference)findPreference("serverPort");
+		final EditTextPreference serverPort= findPreference("serverPort");
 		filesystem.setEntries(new String[]{"Document API","Shell(开发中)","Root权限的Shell(开发中)"});
 		filesystem.setEntryValues(new String[]{"api","shell","root_shell"});
 		serverPort.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
