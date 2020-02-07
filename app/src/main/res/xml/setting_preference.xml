@@ -43,5 +43,10 @@
 			android:title="访问文件系统的方式"
 			android:subtitle="更改时会重置客户端会话"
 			android:defaultValue="api"/>
+		<androidx.preference.SwitchPreference
+			android:key="multiThread"
+			android:title="启用对多线程和断点续传的支持(实验性)"
+			android:subtitle="可能不稳定"
+			android:defaultValue="false"/>
 	</androidx.preference.PreferenceCategory>
 </androidx.preference.PreferenceScreen>

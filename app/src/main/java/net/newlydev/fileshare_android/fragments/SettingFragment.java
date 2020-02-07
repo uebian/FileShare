@@ -87,7 +87,7 @@ public class SettingFragment extends PreferenceFragmentCompat
 					return true;
 				}
 			});
-		lp.setEntries(new String[]{"无认证(不安全)","密码验证","询问我经过我许可(实验性)"});
+		lp.setEntries(new String[]{"无认证(不安全)","密码验证","询问我经过我许可"});
 		lp.setEntryValues(new String[]{"none","passwd","askme"});
 		getPath.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
 				@Override
