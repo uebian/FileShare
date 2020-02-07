@@ -60,6 +60,7 @@ public class HttpThread implements Runnable {
             int postlen = -1;
             String cookies = null;
             String str;
+            String multiThread = "";
             String fileSystemTypes = PreferenceManager.getDefaultSharedPreferences(ctx).getString("fileSystem", "api");
             while (true) {
                 str = sis.readLine();
@@ -76,10 +77,13 @@ public class HttpThread implements Runnable {
                     } catch (Exception e) {
                     }
                 }
-                if (str.split(":")[0].equals("Cookie")) {
+                String headerType = str.split(":")[0];
+                if (headerType.equals("Cookie")) {
                     cookies = str.split(":")[1].trim();
-                } else if (str.split(":")[0].equals("Content-Type")) {
+                } else if (headerType.equals("Content-Type")) {
                     contenttype = str.split(":")[1].trim();
+                }else if (headerType.equals("Range") && filename.startsWith("/download") && PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("multiThread", false)) {
+                    multiThread = str.split(":")[1].trim();
                 }
             }
             Session session = null;
@@ -116,20 +120,54 @@ public class HttpThread implements Runnable {
                         if (filesize == 0) {
                             hr.sendErrorMsg("非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>");
                         } else {
-                            String rethead = "HTTP/1.0 200 OK \r\n" +
-                                    "Content-Type: application/octet-stream; charset=UTF-8\r\n" +
-                                    "Content-Length: " + filesize + "\r\n" +
-                                    "Content-Disposition: attachment; filename=" + URLEncoder.encode(downloadFileName) + "\r\n" +
-                                    "\r\n";
-                            sos.write(rethead.getBytes("UTF-8"));
-                            byte[] buffer = new byte[2048];
-                            int ch = bis.read(buffer);
-                            while (ch != -1) {
-                                sos.write(buffer, 0, ch);
-                                ch = bis.read(buffer, 0, 2048);
+                            if (multiThread.equals("")) {
+                                String rethead = "HTTP/1.0 200 OK \r\n"
+                                        + "Content-Type: application/octet-stream; charset=UTF-8\r\n"
+                                        + "Content-Length: " + filesize + "\r\n"
+                                        + "Content-Disposition: attachment; filename="
+                                        + URLEncoder.encode(downloadFileName,"UTF-8") + "\r\n" + "\r\n";
+                                sos.write(rethead.getBytes("UTF-8"));
+                                byte[] buffer = new byte[8192];
+                                int ch = bis.read(buffer);
+                                while (ch != -1) {
+                                    sos.write(buffer, 0, ch);
+                                    ch = bis.read(buffer, 0, 8192);
+                                }
+                                sos.flush();
+                                bis.close();
+                            } else {
+                                multiThread = multiThread.substring(multiThread.indexOf("bytes") + 6).trim();
+                                long start = Long.parseLong(multiThread.split("-")[0]);
+                                long end;
+                                if (multiThread.split("-").length > 1) {
+                                    end = Long.parseLong(multiThread.split("-")[1].split("/")[0]);
+                                } else {
+                                    end = filesize;
+                                }
+                                String rethead = "HTTP/1.1 206 Partial Content \r\n"
+                                        + "Content-Type: application/octet-stream; charset=UTF-8\r\n"
+                                        + "Content-Length: " + filesize + "\r\n" + "Content-Range: bytes " + start + "-"
+                                        + end + "/" + filesize + "\r\n" + "Content-Disposition: attachment; filename="
+                                        + URLEncoder.encode(downloadFileName,"UTF-8") + "\r\n" + "\r\n";
+                                sos.write(rethead.getBytes("UTF-8"));
+                                bis.skip(start);
+                                if (end - start > 4096) {
+                                    long lastlength = end - start;
+                                    byte[] buffer = new byte[4096];
+                                    int ch = bis.read(buffer);
+                                    while (ch != -1) {
+                                        sos.write(buffer, 0, ch);
+                                        ch = bis.read(buffer, 0, (int) Math.min(lastlength, 4096));
+                                        lastlength = lastlength - ch;
+                                    }
+                                } else {
+                                    byte[] buffer = new byte[(int) (end - start)];
+                                    int ch = bis.read(buffer);
+                                    sos.write(buffer, 0, ch);
+                                }
+                                sos.flush();
+                                bis.close();
                             }
-                            sos.flush();
-                            bis.close();
                         }
                     } else {
                         throw new RuntimeException("已弃用");
