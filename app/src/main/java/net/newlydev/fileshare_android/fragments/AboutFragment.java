@@ -26,16 +26,6 @@ public class AboutFragment extends Fragment
 					startActivity(intent);
 				}
 			});
-		rootview.findViewById(R.id.fragment_about_sourcecode_gitee_btn).setOnClickListener(new OnClickListener(){
-
-				@Override
-				public void onClick(View p1)
-				{
-					Uri uri = Uri.parse("https://gitee.com/uebian/fileshare");
-					Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-					startActivity(intent);
-				}
-			});
 		return rootview;
 		//return super.onCreateView(inflater,container,savedInstanceState);
 	}

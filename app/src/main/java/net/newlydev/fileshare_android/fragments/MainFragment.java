@@ -88,7 +88,7 @@ public class MainFragment extends Fragment
 							catch (Exception e)
 							{
 								e.printStackTrace();
-								ip_tv.setText("无法生成二维码，点我重试。也可以通过访问" + url + "访问您共享的文件");
+								ip_tv.setText(String.format(getResources().getString(R.string.genqr_fail),url));
 							}
 						}
 					}
@@ -105,8 +105,8 @@ public class MainFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
 		View rootview=inflater.inflate(R.layout.fragment_main, container, false);
-		ip_tv = (TextView) rootview.findViewById(R.id.fragment_main_ip_textview);
-		QRCode = (ImageView) rootview.findViewById(R.id.fragment_main_qrcode_imageview);
+		ip_tv = rootview.findViewById(R.id.fragment_main_ip_textview);
+		QRCode = rootview.findViewById(R.id.fragment_main_qrcode_imageview);
 		ip_tv.setOnClickListener(new OnClickListener(){
 
 				@Override
@@ -115,7 +115,7 @@ public class MainFragment extends Fragment
 					refreshQR();
 				}
 			});
-		switch_ss = (Switch) rootview.findViewById(R.id.fragment_status_switch);
+		switch_ss = rootview.findViewById(R.id.fragment_status_switch);
 		update_status();
 		switch_ss.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
 
