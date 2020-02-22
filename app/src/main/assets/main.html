@@ -134,7 +134,7 @@
     function uploadProgress(evt) {
       if (evt.lengthComputable) {
         var percentComplete = Math.round((evt.loaded) * 100 / evt.total);
-        $("#upload-info").html("进度:" + percentComplete + "%,实时速度:" + (evt.loaded - lastUpload) / 8 / 1024 / 1024 / (((new Date()).getTime() - lastUploadTime) / 1000) + "M/s");
+        $("#upload-info").html("进度:" + percentComplete + "%,实时速度:" + (evt.loaded - lastUpload) / 1024 / 1024 / (((new Date()).getTime() - lastUploadTime) / 1000) + "M/s");
         $("#upload-progress").css("width", "" + percentComplete + "%");
         lastUploadTime = (new Date()).getTime();
         lastUpload = evt.loaded;
