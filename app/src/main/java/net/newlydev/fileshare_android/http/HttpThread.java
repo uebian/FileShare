@@ -2,6 +2,7 @@ package net.newlydev.fileshare_android.http;
 
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.UriPermission;
 import android.net.Uri;
 import android.view.ContextThemeWrapper;
 import android.view.WindowManager;
@@ -31,6 +32,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,7 +110,7 @@ public class HttpThread implements Runnable {
                     String downloadFileName = new File(downloadFilePath).getName();
                     downloadFilePath = new File(downloadFilePath).getParent();
                     if (fileSystemTypes.equals("api")) {
-                        DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null)));
+                        DocumentFile df = DocumentFile.fromTreeUri(ctx,ctx.getContentResolver().getPersistedUriPermissions().get(0).getUri());
                         for (String dirname : downloadFilePath.split("/")) {
                             if (!dirname.equals("")) {
                                 df = df.findFile(dirname);
@@ -179,11 +181,11 @@ public class HttpThread implements Runnable {
                         JSONArray dirJsonObject = new JSONArray();
                         dirJsonObject.put("..");
                         if (fileSystemTypes.equals("api")) {
-                            String rootPath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null);
-                            if (rootPath == null) {
+                            List<UriPermission> rootPath = ctx.getContentResolver().getPersistedUriPermissions();
+                            if (rootPath.size()==0) {
                                 hr.sendContent(new JSONObject().put("status", 1).put("message", "起始路径未配置，请在开服端FileShare应用上设置").toString());
                             } else {
-                                DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(rootPath));
+                                DocumentFile df = DocumentFile.fromTreeUri(ctx, rootPath.get(0).getUri());
                                 for (String dirname : session.getPath().split("/")) {
                                     if (!dirname.equals("")) {
                                         df = df.findFile(dirname);
@@ -236,11 +238,11 @@ public class HttpThread implements Runnable {
                         boolean error = false, isFile = false;
                         String body = "", tmpf = "";
                         if (fileSystemTypes.equals("api")) {
-                            String rootPath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null);
-                            if (rootPath == null) {
+                            List<UriPermission> rootPath = ctx.getContentResolver().getPersistedUriPermissions();
+                            if(rootPath.size()==0) {
                                 hr.sendContent("error1");
                             } else {
-                                DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(rootPath));
+                                DocumentFile df = DocumentFile.fromTreeUri(ctx, rootPath.get(0).getUri());
                                 for (String dirname : realPath.split("/")) {
                                     if (!dirname.equals("")) {
                                         df = df.findFile(dirname);
@@ -305,7 +307,7 @@ public class HttpThread implements Runnable {
                             throw new RuntimeException("已弃用");
                         }
                     } else {
-                        if (fileSystemTypes.equals("api") && PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null) == null) {
+                        if (fileSystemTypes.equals("api") && ctx.getContentResolver().getPersistedUriPermissions().size()==0) {
                             hr.sendErrorMsg("起始路径未配置，请在开服端的FileShare应用上进行配置");
                         } else {
                             hr.sendResFile("main.html");
@@ -428,8 +430,7 @@ public class HttpThread implements Runnable {
                     sis.read(data);
                     String pwd_md5 = new String(data, "utf-8").split("=")[1];
                     String content;
-                    SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(ctx);
-                    String real_pwd = p.getString("password", "null");
+                    String real_pwd = PreferenceManager.getDefaultSharedPreferences(ctx).getString("password", "null");
 
                     String rethead = "HTTP/1.0 200 OK \r\n" +
                             "Content-Type: text/html; charset=UTF-8\r\n";
@@ -462,7 +463,7 @@ public class HttpThread implements Runnable {
                             ms.discardBodyData();
                             hr.sendContent(new JSONObject().put("status",1).put("message","服务器未开放上传，请在开服端FileShare应用上配置").toString());
                         } else if (fileSystemTypes.equals("api")) {
-                            DocumentFile df = DocumentFile.fromTreeUri(ctx, Uri.parse(PreferenceManager.getDefaultSharedPreferences(ctx).getString("uriPath", null)));
+                            DocumentFile df = DocumentFile.fromTreeUri(ctx, ctx.getContentResolver().getPersistedUriPermissions().get(0).getUri());
                             for (String dirname : session.getPath().split("/")) {
                                 if (!dirname.equals("")) {
                                     df = df.findFile(dirname);
