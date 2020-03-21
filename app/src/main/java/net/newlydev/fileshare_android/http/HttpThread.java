@@ -44,6 +44,7 @@ public class HttpThread implements Runnable {
     private DataOutputStream sos;
     private HttpRespond hr;
     private boolean premissiond;
+    public static final int BUFSIZE=8192;
 
     public HttpThread(Socket client, MainService ctx) throws IOException {
         this.client = client;
@@ -117,19 +118,19 @@ public class HttpThread implements Runnable {
                                 df = df.findFile(dirname);
                             }
                         }
-                        DocumentFile downloadfile = df.findFile(downloadFileName);
-                        InputStream bis = ctx.getContentResolver().openInputStream(downloadfile.getUri());
-                        long filesize = downloadfile.length();
+                        DocumentFile downloadFile = df.findFile(downloadFileName);
+                        InputStream bis = ctx.getContentResolver().openInputStream(downloadFile.getUri());
+                        long filesize = downloadFile.length();
                         if (filesize == 0) {
                             hr.sendErrorMsg("非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>");
                         } else {
                             if (multiThread.equals("")) {
-                                String rethead = "HTTP/1.0 200 OK \r\n"
+                                String retHead = "HTTP/1.0 200 OK \r\n"
                                         + "Content-Type: application/octet-stream; charset=UTF-8\r\n"
                                         + "Content-Length: " + filesize + "\r\n"
                                         + "Content-Disposition: attachment; filename="
                                         + URLEncoder.encode(downloadFileName,"UTF-8") + "\r\n" + "\r\n";
-                                sos.write(rethead.getBytes("UTF-8"));
+                                sos.write(retHead.getBytes("UTF-8"));
                                 byte[] buffer = new byte[8192];
                                 int ch = bis.read(buffer);
                                 while (ch != -1) {
@@ -142,31 +143,34 @@ public class HttpThread implements Runnable {
                                 multiThread = multiThread.substring(multiThread.indexOf("bytes") + 6).trim();
                                 long start = Long.parseLong(multiThread.split("-")[0]);
                                 long end;
-                                if (multiThread.split("-").length > 1) {
+                                try {
                                     end = Long.parseLong(multiThread.split("-")[1].split("/")[0]);
-                                } else {
-                                    end = filesize;
+                                } catch (Exception e) {
+                                    end = filesize - 1;
                                 }
+                                if (end == filesize) {
+                                    end--;
+                                }
+                                long lastlength = end - start + 1;
                                 String rethead = "HTTP/1.1 206 Partial Content \r\n"
                                         + "Content-Type: application/octet-stream; charset=UTF-8\r\n"
-                                        + "Content-Length: " + filesize + "\r\n" + "Content-Range: bytes " + start + "-"
-                                        + end + "/" + filesize + "\r\n" + "Content-Disposition: attachment; filename="
-                                        + URLEncoder.encode(downloadFileName,"UTF-8") + "\r\n" + "\r\n";
+                                        + "Content-Length: " + lastlength + "\r\n" + "Content-Range: bytes " + start
+                                        + "-" + end + "/" + filesize + "\r\n"
+                                        + "Content-Disposition: attachment; filename="
+                                        + URLEncoder.encode(downloadFileName, "UTF-8") + "\r\n" + "\r\n";
                                 sos.write(rethead.getBytes("UTF-8"));
                                 bis.skip(start);
-                                if (end - start > 4096) {
-                                    long lastlength = end - start;
-                                    byte[] buffer = new byte[4096];
-                                    int ch = bis.read(buffer);
-                                    while (ch != -1) {
+                                try {
+                                    byte[] buffer = new byte[BUFSIZE];
+                                    int ch;
+                                    do {
+                                        ch = bis.read(buffer, 0, (int) Math.min(lastlength, BUFSIZE));
                                         sos.write(buffer, 0, ch);
-                                        ch = bis.read(buffer, 0, (int) Math.min(lastlength, 4096));
                                         lastlength = lastlength - ch;
-                                    }
-                                } else {
-                                    byte[] buffer = new byte[(int) (end - start)];
-                                    int ch = bis.read(buffer);
-                                    sos.write(buffer, 0, ch);
+                                    } while (ch != -1 && lastlength > 0);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    System.out.printf("start=%d,end=%d\n", start, end);
                                 }
                                 sos.flush();
                                 bis.close();
@@ -389,26 +393,26 @@ public class HttpThread implements Runnable {
                                     lock.wait();
                                 }
                                 String content;
-                                String rethead = "HTTP/1.0 200 OK \r\n" +
+                                String retHead = "HTTP/1.0 200 OK \r\n" +
                                         "Content-Type: text/html; charset=UTF-8\r\n";
                                 if (premissiond) {
                                     content = new JSONObject().put("status", 0).toString();
                                     String token = new Session(ctx).getToken();
-                                    rethead = rethead + "Set-Cookie: token=" + token + "; Path=/;\r\n";
+                                    retHead = retHead + "Set-Cookie: token=" + token + "; Path=/;\r\n";
                                 } else {
                                     content = new JSONObject().put("status", 1).put("message", "请求被拒").toString();
                                 }
-                                rethead = rethead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
-                                sos.write(rethead.getBytes("utf-8"));
+                                retHead = retHead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
+                                sos.write(retHead.getBytes("utf-8"));
                                 sos.write(content.getBytes("utf-8"));
                                 sos.flush();
                             } else {
                                 InputStream is = ctx.getClassLoader().getResourceAsStream("assets/waitingforpermission.html");
-                                String rethead = "HTTP/1.0 200 OK \r\n" +
+                                String retHead = "HTTP/1.0 200 OK \r\n" +
                                         "Content-Type: text/html; charset=UTF-8\r\n" +
                                         "Content-Length: " + is.available() + "\r\n" +
                                         "\r\n";
-                                sos.write(rethead.getBytes("UTF-8"));
+                                sos.write(retHead.getBytes("UTF-8"));
                                 byte[] buffer = new byte[1024];
                                 int ch = is.read(buffer);
                                 while (ch != -1) {

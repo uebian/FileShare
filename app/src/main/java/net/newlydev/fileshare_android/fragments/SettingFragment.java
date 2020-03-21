@@ -15,7 +15,6 @@ import net.newlydev.fileshare_android.R;
 
 public class SettingFragment extends PreferenceFragmentCompat
 {
-	
 	@Override
 	public void onCreatePreferences(Bundle p1, String p2)
 	{
@@ -33,18 +32,18 @@ public class SettingFragment extends PreferenceFragmentCompat
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
 				{
-					boolean ok=true;
+					boolean isValid=true;
 					try{
 						int i=Integer.parseInt(p2.toString());
 						if(i<=1024 || i>65536)
 						{
-							ok=false;
+							isValid=false;
 						}
 					}catch(NumberFormatException e)
 					{
-						ok=false;
+						isValid=false;
 					}
-					if(!ok)
+					if(!isValid)
 					{
 						AlertDialog.Builder ab=new AlertDialog.Builder(getActivity());
 						ab.setTitle("更改未保存");

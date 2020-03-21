@@ -1,12 +1,14 @@
 package net.newlydev.fileshare_android.fragments;
 
 import android.content.*;
+import android.content.pm.PackageManager;
 import android.net.*;
 import android.os.*;
 import android.view.*;
 import net.newlydev.fileshare_android.*;
 
 import android.view.View.*;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
@@ -15,8 +17,8 @@ public class AboutFragment extends Fragment
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 	{
-		View rootview=inflater.inflate(R.layout.fragment_about,container,false);
-		rootview.findViewById(R.id.fragment_about_sourcecode_github_btn).setOnClickListener(new OnClickListener(){
+		View rootView=inflater.inflate(R.layout.fragment_about,container,false);
+		rootView.findViewById(R.id.fragment_about_sourcecode_github_btn).setOnClickListener(new OnClickListener(){
 
 				@Override
 				public void onClick(View p1)
@@ -26,7 +28,12 @@ public class AboutFragment extends Fragment
 					startActivity(intent);
 				}
 			});
-		return rootview;
+		try {
+			((TextView)rootView.findViewById(R.id.fragment_about_version_name_tv)).setText(getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(),0).versionName);
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		return rootView;
 		//return super.onCreateView(inflater,container,savedInstanceState);
 	}
 
