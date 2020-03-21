@@ -13,6 +13,7 @@ import androidx.preference.PreferenceManager;
 
 import net.newlydev.fileshare_android.FastDocumentFile;
 import net.newlydev.fileshare_android.MainService;
+import net.newlydev.fileshare_android.R;
 import net.newlydev.fileshare_android.Session;
 import net.newlydev.fileshare_android.Utils;
 
@@ -340,7 +341,7 @@ public class HttpThread implements Runnable {
                                     @Override
                                     public void run() {
                                         try {
-                                            AlertDialog.Builder ab = new AlertDialog.Builder(new ContextThemeWrapper(ctx, androidx.appcompat.R.style.Theme_AppCompat_Light));
+                                            AlertDialog.Builder ab = new AlertDialog.Builder(new ContextThemeWrapper(ctx, R.style.Theme_AppCompat_Light));
                                             ab.setCancelable(false);
                                             ab.setTitle("FileShare");
                                             ab.setMessage("下列用户请求您的权限来访问您的文件\nip地址:" + client.getInetAddress().toString());
