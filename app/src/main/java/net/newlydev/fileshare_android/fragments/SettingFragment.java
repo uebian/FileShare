@@ -19,14 +19,14 @@ public class SettingFragment extends PreferenceFragmentCompat
 	public void onCreatePreferences(Bundle p1, String p2)
 	{
 		addPreferencesFromResource(R.xml.setting_preference);
-		final ListPreference filesystem= findPreference("fileSystem");
-		final ListPreference lp= findPreference("authType");
+		final ListPreference fileSystem= findPreference("fileSystem");
+		final ListPreference authType= findPreference("authType");
 		final EditTextPreference rootPath= findPreference("rootPath");
 		final EditTextPreference pwd= findPreference("password");
 		final Preference getPath=findPreference("getPath");
 		final EditTextPreference serverPort= findPreference("serverPort");
-		filesystem.setEntries(new String[]{"Document API","Shell(开发中)","Root权限的Shell(开发中)"});
-		filesystem.setEntryValues(new String[]{"api","shell","root_shell"});
+		fileSystem.setEntries(new String[]{"Document API","Shell(开发中)","Root权限的Shell(开发中)"});
+		fileSystem.setEntryValues(new String[]{"api","shell","root_shell"});
 		serverPort.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
 
 				@Override
@@ -86,8 +86,8 @@ public class SettingFragment extends PreferenceFragmentCompat
 					return true;
 				}
 			});
-		lp.setEntries(new String[]{"无认证(不安全)","密码验证","询问我经过我许可"});
-		lp.setEntryValues(new String[]{"none","passwd","askme"});
+		authType.setEntries(new String[]{"无认证(不安全)","密码验证","询问我经过我许可"});
+		authType.setEntryValues(new String[]{"none","passwd","askme"});
 		getPath.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener(){
 				@Override
 				public boolean onPreferenceClick(Preference p1)
@@ -116,11 +116,11 @@ public class SettingFragment extends PreferenceFragmentCompat
 					}
 				}
 			});
-		if(lp.getValue().equals("passwd"))
+		if(authType.getValue().equals("passwd"))
 		{
 			pwd.setEnabled(true);
 		}
-		lp.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+		authType.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
 
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
@@ -145,7 +145,7 @@ public class SettingFragment extends PreferenceFragmentCompat
 					return true;
 				}
 			});
-		if(!filesystem.getValue().equals("api"))
+		if(!fileSystem.getValue().equals("api"))
 		{
 			rootPath.setVisible(true);
 			getPath.setVisible(false);
@@ -153,7 +153,7 @@ public class SettingFragment extends PreferenceFragmentCompat
 			rootPath.setVisible(false);
 			getPath.setVisible(true);
 		}
-		filesystem.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+		fileSystem.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
 				@Override
 				public boolean onPreferenceChange(Preference p1, Object p2)
 				{

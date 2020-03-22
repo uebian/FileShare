@@ -10,18 +10,40 @@ public class Session
 	public static ArrayList<Session> sessions=new ArrayList<Session>();
 	private String token;
 	private String path;
-	private String rootpath;
+	private String rootPath;
 	private static HashMap<String,String> downloadLinks=new HashMap<String, String>();
+	public enum AuthType{
+	    NONE(0),PASSWORD(1),ASKME(2);
+	    int type;
+	    AuthType(int type)
+        {
+            this.type=type;
+        }
+        public static AuthType get(String type)
+        {
+            switch(type)
+            {
+                case "none":
+                    return NONE;
+                case "passwd":
+                    return PASSWORD;
+                case "askme":
+                    return ASKME;
+                default:
+                    return null;
+            }
+        }
+    }
 	public Session(Context ctx)
 	{
 		token = Utils.getRandomString(32);
 		if(PreferenceManager.getDefaultSharedPreferences(ctx).getString("fileSystem", "api").equals("api"))
 		{
-			rootpath="/";
+			rootPath ="/";
 		}else{
-			rootpath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("rootPath", "/");
+			rootPath = PreferenceManager.getDefaultSharedPreferences(ctx).getString("rootPath", "/");
 		}
-		path=rootpath;
+		path= rootPath;
 		sessions.add(this);
 	}
 
@@ -42,7 +64,7 @@ public class Session
 		}
 		if (name.equals(".."))
 		{
-			if(path.equals(rootpath)||path.equals(rootpath+"/")||path.equals(rootpath+"//"))
+			if(path.equals(rootPath)||path.equals(rootPath +"/")||path.equals(rootPath +"//"))
 			{
 				return;
 			}

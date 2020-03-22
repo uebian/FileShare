@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 
 public class HttpRespond {
     Context ctx;
@@ -20,7 +19,7 @@ public class HttpRespond {
         this.os = os;
     }
 
-    public void sendResFile(String fileName) throws UnsupportedEncodingException, IOException {
+    public void sendResFile(String fileName) throws IOException {
         if (!fileName.startsWith("/")) {
             fileName = "/" + fileName;
         }
@@ -57,11 +56,11 @@ public class HttpRespond {
     }
     public void sendContent(String content) throws IOException
     {
-        String rethead = "HTTP/1.0 200 OK \r\n" +
+        String retHead = "HTTP/1.0 200 OK \r\n" +
                 "Content-Type: text/html; charset=UTF-8\r\n" +
                 "Content-Length: " + content.getBytes("UTF-8").length + "\r\n" +
                 "\r\n";
-        os.write(rethead.getBytes("UTF-8"));
+        os.write(retHead.getBytes("UTF-8"));
         os.write(content.getBytes("UTF-8"));
         os.flush();
     }

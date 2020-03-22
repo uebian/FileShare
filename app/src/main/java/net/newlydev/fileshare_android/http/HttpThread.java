@@ -1,9 +1,7 @@
 package net.newlydev.fileshare_android.http;
 
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.UriPermission;
-import android.net.Uri;
 import android.view.ContextThemeWrapper;
 import android.view.WindowManager;
 
@@ -91,7 +89,7 @@ public class HttpThread implements Runnable {
                 }
             }
             Session session = null;
-            String authType = PreferenceManager.getDefaultSharedPreferences(ctx).getString("authType", "passwd");
+            Session.AuthType authType=Session.AuthType.get(PreferenceManager.getDefaultSharedPreferences(ctx).getString("authType", "passwd"));
             String t = null;
             if (cookies != null) {
                 for (String c : cookies.split(";")) {
@@ -120,14 +118,14 @@ public class HttpThread implements Runnable {
                         }
                         DocumentFile downloadFile = df.findFile(downloadFileName);
                         InputStream bis = ctx.getContentResolver().openInputStream(downloadFile.getUri());
-                        long filesize = downloadFile.length();
-                        if (filesize == 0) {
+                        long fileSize = downloadFile.length();
+                        if (fileSize == 0) {
                             hr.sendErrorMsg("非常抱歉，我们暂不支持下载大小为0的文件。<a href=\"/\">返回</a>");
                         } else {
                             if (multiThread.equals("")) {
                                 String retHead = "HTTP/1.0 200 OK \r\n"
                                         + "Content-Type: application/octet-stream; charset=UTF-8\r\n"
-                                        + "Content-Length: " + filesize + "\r\n"
+                                        + "Content-Length: " + fileSize + "\r\n"
                                         + "Content-Disposition: attachment; filename="
                                         + URLEncoder.encode(downloadFileName,"UTF-8") + "\r\n" + "\r\n";
                                 sos.write(retHead.getBytes("UTF-8"));
@@ -146,16 +144,16 @@ public class HttpThread implements Runnable {
                                 try {
                                     end = Long.parseLong(multiThread.split("-")[1].split("/")[0]);
                                 } catch (Exception e) {
-                                    end = filesize - 1;
+                                    end = fileSize - 1;
                                 }
-                                if (end == filesize) {
+                                if (end == fileSize) {
                                     end--;
                                 }
                                 long lastlength = end - start + 1;
                                 String rethead = "HTTP/1.1 206 Partial Content \r\n"
                                         + "Content-Type: application/octet-stream; charset=UTF-8\r\n"
                                         + "Content-Length: " + lastlength + "\r\n" + "Content-Range: bytes " + start
-                                        + "-" + end + "/" + filesize + "\r\n"
+                                        + "-" + end + "/" + fileSize + "\r\n"
                                         + "Content-Disposition: attachment; filename="
                                         + URLEncoder.encode(downloadFileName, "UTF-8") + "\r\n" + "\r\n";
                                 sos.write(rethead.getBytes("UTF-8"));
@@ -320,7 +318,7 @@ public class HttpThread implements Runnable {
                     }
                 } else {
                     switch (authType) {
-                        case "none": {
+                        case NONE: {
                             session = new Session(ctx);
                             InputStream is = ctx.getClassLoader().getResourceAsStream("assets/refresh.html");
                             String rethead = "HTTP/1.0 200 OK \r\n" +
@@ -337,7 +335,7 @@ public class HttpThread implements Runnable {
                             }
                             break;
                         }
-                        case "askme": {
+                        case ASKME: {
                             if (filename.startsWith("/askpermission")) {
                                 premissiond = false;
                                 final Object lock = new Object();
@@ -423,14 +421,14 @@ public class HttpThread implements Runnable {
                             }
                             break;
                         }
-                        case "passwd": {
+                        case PASSWORD: {
                             hr.sendResFile("login.html");
                             break;
                         }
                     }
                 }
             } else {
-                if (authType.equals("passwd") && filename.equals("/dologin")) {
+                if (authType== Session.AuthType.PASSWORD && filename.equals("/dologin")) {
                     byte[] data = new byte[postlen];
                     sis.read(data);
                     String pwd_md5 = new String(data, "utf-8").split("=")[1];
@@ -456,13 +454,13 @@ public class HttpThread implements Runnable {
                         hr.sendErrorMsg("请先登录");
                     } else {
                         long startTime=System.currentTimeMillis();
-                        String uploadfilename = null;
+                        String uploadFileName = null;
                         String boundary = contenttype.split("boundary=")[1];
                         MultipartStream ms = new MultipartStream(sis, boundary.getBytes("utf-8"));
                         String[] headers = ms.readHeaders().split("\r\n");
                         Matcher matcher = Pattern.compile("Content-Disposition: form-data; name=\".*\"; filename=\"(.*){1}\".*").matcher(headers[1]);
                         if (matcher.matches()) {
-                            uploadfilename = new File(matcher.group(1)).getName();
+                            uploadFileName = new File(matcher.group(1)).getName();
                         }
                         if (!PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("allowUpload", false)) {
                             ms.discardBodyData();
@@ -474,11 +472,11 @@ public class HttpThread implements Runnable {
                                     df = df.findFile(dirname);
                                 }
                             }
-                            if (df.findFile(uploadfilename) != null) {
+                            if (df.findFile(uploadFileName) != null) {
                                 ms.discardBodyData();
                                 hr.sendContent(new JSONObject().put("status",1).put("message","文件名重复，请更换后重试").toString());
                             }else {
-                                DocumentFile uploadcf = df.createFile("application/octet-stream", uploadfilename);
+                                DocumentFile uploadcf = df.createFile("application/octet-stream", uploadFileName);
                                 OutputStream fos = ctx.getContentResolver().openOutputStream(uploadcf.getUri());
                                 ms.readBodyData(fos);
                                 JSONObject result = new JSONObject();
