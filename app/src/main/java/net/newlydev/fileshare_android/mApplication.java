@@ -16,5 +16,5 @@ public class mApplication extends Application
 			((NotificationManager)getSystemService(NOTIFICATION_SERVICE)).createNotificationChannel(mChannel);
 		}
 	}
-	
+
 }
