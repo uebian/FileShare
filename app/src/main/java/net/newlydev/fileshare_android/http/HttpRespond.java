@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class HttpRespond {
     Context ctx;
@@ -24,11 +25,11 @@ public class HttpRespond {
             fileName = "/" + fileName;
         }
         InputStream is = ctx.getClassLoader().getResourceAsStream("assets" + fileName);
-        String rethead = "HTTP/1.0 200 OK \r\n" +
+        String retHead = "HTTP/1.0 200 OK \r\n" +
                 "Content-Length: " + is.available() + "\r\n" +
                 "Content-Type: " + Utils.getContentTypeByExpansion(Utils.getExtensionByCutStr(fileName)) + "; charset=UTF-8\r\n" +
                 "\r\n";
-        os.write(rethead.getBytes("UTF-8"));
+        os.write(retHead.getBytes(StandardCharsets.UTF_8));
         byte[] buffer = new byte[1024];
         int ch = is.read(buffer);
         while (ch != -1) {
@@ -46,12 +47,12 @@ public class HttpRespond {
             sb.append(tmp).append("\n");
         }
         String body=sb.toString().replaceFirst("contentarea",msgHtml);
-        String rethead = "HTTP/1.0 200 OK \r\n" +
+        String retHead = "HTTP/1.0 200 OK \r\n" +
                 "Content-Type: text/html; charset=UTF-8\r\n" +
                 "Content-Length: " + body.getBytes("UTF-8").length + "\r\n" +
                 "\r\n";
-        os.write(rethead.getBytes("UTF-8"));
-        os.write(body.getBytes("UTF-8"));
+        os.write(retHead.getBytes(StandardCharsets.UTF_8));
+        os.write(body.getBytes(StandardCharsets.UTF_8));
         os.flush();
     }
     public void sendContent(String content) throws IOException
