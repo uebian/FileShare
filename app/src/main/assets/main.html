@@ -41,10 +41,14 @@
 
         <div>请稍候...</div>
         <br/>
+        <div>总进度</div>
         <div class="mdui-progress">
-            <div name="upload-progress" id="upload-progress" class="mdui-progress-determinate"></div>
+            <div name="upload-progress-total" id="upload-progress-total" class="mdui-progress-determinate"></div>
         </div>
         <div name="upload-info" id="upload-info">
+        </div>
+        <div class="mdui-progress">
+            <div name="upload-progress" id="upload-progress" class="mdui-progress-determinate"></div>
         </div>
     </div>
     <form method="POST" target="hidden_frame_fileupload" id="form_upload" action="upload" enctype="multipart/form-data">
@@ -62,6 +66,8 @@
         var need = false;
         var needupload = false;
         var items = new Array();
+
+        var total_files = 0;
 
         function dogetfiles(fname) {
             $.get("/getfiles?path=" + fname,
@@ -95,6 +101,8 @@
                 });
                 return;
             }
+            lastUpload = 0;
+            lastUploadTime = (new Date()).getTime();
             var fs = ofile[0];
             var fd = new FormData();
             fd.append("file_upload", fs);
@@ -114,6 +122,8 @@
                         for (var i = 1; i < ofile.length; i++) {
                             nofile.push(ofile[i])
                         }
+                        var percentComplete = Math.round((total_files - nofile.length) * 100 / total_files);
+                        $("#upload-progress-total").css("width", "" + percentComplete + "%");
                         processUpload(nofile, result_msg);
                     }
                 } catch (e) {
@@ -127,11 +137,10 @@
         function doupload() {
             try {
                 upload_pd.open();
-                lastUpload = 0;
-                lastUploadTime = (new Date()).getTime();
                 var sub = document.getElementById("file_submit");
                 var filearea = document.getElementById("file_upload");
                 var ofile = filearea.files;
+                total_files = ofile.length;
                 var result_msg = "";
                 processUpload(ofile, result_msg)
             } catch (e) {

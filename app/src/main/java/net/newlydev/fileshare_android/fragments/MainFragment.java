@@ -4,6 +4,7 @@ import android.graphics.*;
 import android.os.*;
 
 import androidx.appcompat.app.*;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.preference.*;
 import android.view.*;
 import android.view.View.*;
@@ -21,7 +22,7 @@ import androidx.fragment.app.Fragment;
 
 public class MainFragment extends Fragment
 {
-	Switch switch_ss;
+	SwitchCompat switch_ss;
 	private MyConnection conn;
 	private TextView ip_tv;
 	private ImageView QRCode;

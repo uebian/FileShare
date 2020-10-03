@@ -11,7 +11,7 @@
 		android:orientation="horizontal"
 		android:gravity="right|center_vertical">
 
-		<Switch
+		<androidx.appcompat.widget.SwitchCompat
 			android:layout_height="wrap_content"
 			android:layout_width="wrap_content"
 			android:text="@string/start_server"
