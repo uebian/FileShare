@@ -67,7 +67,6 @@ public class MainActivity extends mActivity {
             fragmentManager.beginTransaction().replace(R.id.activity_main_content, settingFragment).commit();
             try {
                 varfile.createNewFile();
-
                 DataOutputStream varos = new DataOutputStream(new FileOutputStream(varfile));
                 varos.writeInt(info.versionCode);
                 varos.close();
