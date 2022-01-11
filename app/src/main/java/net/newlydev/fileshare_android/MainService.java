@@ -14,7 +14,7 @@ import net.newlydev.fileshare_android.http.*;
 
 public class MainService extends Service
 {
-	private static ExecutorService mainThreadPool= Executors.newCachedThreadPool();
+	private static final ExecutorService mainThreadPool= Executors.newCachedThreadPool();
 	public Handler handler=new Handler();
 	private NotificationCompat.Builder builder;
 	private ServerSocket ss;
@@ -43,7 +43,7 @@ public class MainService extends Service
 					Socket client=ss.accept();
 					mainThreadPool.submit(new HttpThread(client,MainService.this));
 				}
-				catch (IOException e)
+				catch (IOException ignored)
 				{
 				}
 			}
@@ -96,7 +96,7 @@ public class MainService extends Service
 				{
 					ss.close();
 				}
-				catch (Exception e)
+				catch (Exception ignored)
 				{}
 			}
 		}.start();
