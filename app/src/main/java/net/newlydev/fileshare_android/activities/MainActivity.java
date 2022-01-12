@@ -4,9 +4,7 @@ import android.content.*;
 import android.content.pm.*;
 import android.os.*;
 
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
-import androidx.preference.*;
 
 import android.view.*;
 import android.widget.*;
@@ -31,6 +29,10 @@ public class MainActivity extends mActivity {
     public ProgressBar pb;
     public ListView lv;
 
+    public final int HOME_INDEX=0;
+    public final int SETTINGS_INDEX=1;
+    public final int ABOUT_INDEX=2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,9 +50,9 @@ public class MainActivity extends mActivity {
         pb = findViewById(R.id.activity_main_waitingprogressbar);
         pb.setVisibility(View.GONE);
         ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.list_text);
-        aa.add("首页");
-        aa.add("设置");
-        aa.add("关于");
+        aa.add(getResources().getString(R.string.home));
+        aa.add(getResources().getString(R.string.settings));
+        aa.add(getResources().getString(R.string.about));
         lv.setAdapter(aa);
 
         setSupportActionBar(toolbar);
@@ -73,7 +75,7 @@ public class MainActivity extends mActivity {
             } catch (Exception e) {
             }
             Toast.makeText(this, "首次使用，请先设置", Toast.LENGTH_SHORT).show();
-            lv.setItemChecked(1, true);
+            lv.setItemChecked(SETTINGS_INDEX, true);
         } else {
             try {
                 DataInputStream varis = new DataInputStream(new FileInputStream(varfile));
@@ -90,7 +92,7 @@ public class MainActivity extends mActivity {
             } catch (Exception e) {
             }
             fragmentManager.beginTransaction().replace(R.id.activity_main_content, statusFragment).commit();
-            lv.setItemChecked(0, true);
+            lv.setItemChecked(HOME_INDEX, true);
         }
         final DrawerLayout mDrawerLayout = findViewById(R.id.activity_main_dl);
         ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.open, R.string.close) {
@@ -111,13 +113,13 @@ public class MainActivity extends mActivity {
             @Override
             public void onItemClick(AdapterView<?> p1, View p2, int p3, long p4) {
                 switch (p3) {
-                    case 0:
+                    case HOME_INDEX:
                         fragmentManager.beginTransaction().replace(R.id.activity_main_content, statusFragment).commit();
                         break;
-                    case 1:
+                    case SETTINGS_INDEX:
                         fragmentManager.beginTransaction().replace(R.id.activity_main_content, settingFragment).commit();
                         break;
-                    case 2:
+                    case ABOUT_INDEX:
                         fragmentManager.beginTransaction().replace(R.id.activity_main_content, aboutFragment).commit();
                         break;
                 }

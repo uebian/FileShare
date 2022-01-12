@@ -10,4 +10,7 @@
     <string name="server_started">与您处于同一局域网(热点)的用户无需流量无需安装客户端即可通过访问%s或扫描下方二维码访问您共享的文件(网络状态更改时请点击本文字来刷新)</string>
     <string name="server_stopped">服务未开启</string>
     <string name="no_internet">您的设备似乎没有有效的ipv4连接，请连接WiFi或打开WiFi热点后点本段文字重试</string>
+    <string name="home">首页</string>
+    <string name="settings">设置</string>
+    <string name="about">关于</string>
 </resources>
