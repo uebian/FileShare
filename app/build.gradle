@@ -6,7 +6,7 @@ android {
         applicationId "net.newlydev.fileshare_android"
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 24
+        versionCode 25
         versionName '2.5'
         multiDexEnabled = true
     }
