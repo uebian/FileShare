@@ -66,7 +66,7 @@ public class MainService extends Service
 		builder.setContentText("点击管理");
 		builder.setSmallIcon(R.mipmap.ic_launcher);
 		builder.setOngoing(true);
-		builder.setContentIntent(PendingIntent.getActivity(this,0,new Intent(this,MainActivity.class),0));
+		builder.setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE));
 	}
 	
 	@Override
