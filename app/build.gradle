@@ -1,34 +1,33 @@
-apply plugin: 'com.android.application'
+plugins {
+    alias(libs.plugins.android.application)
+}
 
 android {
     namespace 'net.newlydev.fileshare_android'
-    compileSdkVersion 34
+    compileSdk 36
     defaultConfig {
         applicationId "net.newlydev.fileshare_android"
-        minSdkVersion 21
-        targetSdkVersion 34
-        versionCode 26
-        versionName '2.6'
-        multiDexEnabled = true
+        minSdk 21
+        targetSdk 36
+        versionCode 27
+        versionName '2.7'
     }
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    implementation 'com.google.android.material:material:1.12.0'
-    implementation 'com.google.android.gms:play-services-ads:23.1.0'
-	implementation 'androidx.preference:preference:1.2.1'
-    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.play.services.ads
+    implementation libs.preference
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
 }
