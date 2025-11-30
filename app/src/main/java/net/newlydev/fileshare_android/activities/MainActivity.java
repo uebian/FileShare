@@ -4,6 +4,7 @@ import android.content.*;
 import android.content.pm.*;
 import android.os.*;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.view.*;
@@ -15,6 +16,7 @@ import com.google.android.gms.ads.*;
 import java.io.*;
 
 import net.newlydev.fileshare_android.*;
+import net.newlydev.fileshare_android.ServiceStatusTracker;
 import net.newlydev.fileshare_android.fragments.*;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -24,8 +26,7 @@ import androidx.fragment.app.Fragment;
 
 import net.newlydev.fileshare_android.R;
 
-public class MainActivity extends mActivity {
-    public boolean waiting;
+public class MainActivity extends AppCompatActivity {
     public ProgressBar pb;
     public ListView lv;
 
@@ -44,11 +45,15 @@ public class MainActivity extends mActivity {
         final Fragment aboutFragment = new AboutFragment();
         final Fragment settingFragment = new SettingFragment();
         final FragmentManager fragmentManager = getSupportFragmentManager();
-        waiting = false;
         Toolbar toolbar = findViewById(R.id.toolbar_normal);
         lv = findViewById(R.id.activity_main_list);
         pb = findViewById(R.id.activity_main_waitingprogressbar);
         pb.setVisibility(View.GONE);
+        ServiceStatusTracker.getStatus().observe(this, status -> {
+            boolean starting = status == ServiceStatusTracker.Status.STARTING;
+            pb.setVisibility(starting ? View.VISIBLE : View.GONE);
+            lv.setEnabled(!starting);
+        });
         ArrayAdapter<String> aa = new ArrayAdapter<String>(this, R.layout.list_text);
         aa.add(getResources().getString(R.string.home));
         aa.add(getResources().getString(R.string.settings));
@@ -63,6 +68,7 @@ public class MainActivity extends mActivity {
         try {
             info = manager.getPackageInfo(this.getPackageName(), 0);
         } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
         }
         File varfile = new File(getFilesDir(), "var");
         if (!varfile.exists()) {
@@ -73,6 +79,7 @@ public class MainActivity extends mActivity {
                 varos.writeInt(info.versionCode);
                 varos.close();
             } catch (Exception e) {
+                e.printStackTrace();
             }
             Toast.makeText(this, "首次使用，请先设置", Toast.LENGTH_SHORT).show();
             lv.setItemChecked(SETTINGS_INDEX, true);
@@ -129,18 +136,11 @@ public class MainActivity extends mActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        if (!waiting) {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1 && resultCode == RESULT_OK) {
             Toast.makeText(this, "起始目录已更新", Toast.LENGTH_SHORT).show();
-            if (getContentResolver().getPersistedUriPermissions().size() > 0) {
+            if (!getContentResolver().getPersistedUriPermissions().isEmpty()) {
                 getContentResolver().releasePersistableUriPermission(getContentResolver().getPersistedUriPermissions().get(0).getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION |
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             }

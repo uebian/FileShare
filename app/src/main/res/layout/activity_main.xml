@@ -4,9 +4,11 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical">
+	android:orientation="vertical"
+	android:background="?attr/colorSurface">
 
 	<com.google.android.material.appbar.AppBarLayout
+		android:fitsSystemWindows="true"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		style="@style/mToolBar">
@@ -14,7 +16,8 @@
 			android:id="@+id/toolbar_normal"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			app:titleTextColor="#ffffff">
+			android:background="?attr/colorPrimary"
+			app:titleTextColor="?attr/colorOnPrimary">
 
 			<ProgressBar
 				android:layout_width="wrap_content"
@@ -29,19 +32,21 @@
 		android:id="@+id/activity_main_dl"
 		android:layout_width="match_parent"
 		android:layout_height="0dp"
-		android:layout_weight="1.0">
+		android:layout_weight="1.0"
+		android:background="?attr/colorSurface">
 
 		<FrameLayout
 			android:layout_height="match_parent"
 			android:layout_width="match_parent"
 			android:orientation="vertical"
-			android:id="@+id/activity_main_content"/>
+			android:id="@+id/activity_main_content"
+			android:background="?attr/colorSurface"/>
 
 		<LinearLayout
 			android:layout_width="240dp"
 			android:layout_height="match_parent"
 			android:layout_gravity="start"
-			android:background="#FFFFFF">
+			android:background="?attr/colorSurface">
 
 			<ListView
 				android:layout_height="wrap_content"
@@ -64,4 +69,3 @@
 	</com.google.android.gms.ads.AdView>
 
 </LinearLayout>
-

@@ -1,16 +1,13 @@
 package net.newlydev.fileshare_android.http;
 
-import android.content.DialogInterface;
 import android.content.UriPermission;
-import android.view.ContextThemeWrapper;
-import android.view.WindowManager;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
 import net.newlydev.fileshare_android.FastDocumentFile;
 import net.newlydev.fileshare_android.MainService;
+import net.newlydev.fileshare_android.PermissionRequestManager;
 import net.newlydev.fileshare_android.R;
 import net.newlydev.fileshare_android.Session;
 import net.newlydev.fileshare_android.Utils;
@@ -41,7 +38,6 @@ public class HttpThread implements Runnable {
 	private DataInputStream sis;
 	private DataOutputStream sos;
 	private HttpRespond hr;
-	private boolean premissiond;
 	public static final int BUFSIZE=8192;
 
 	public HttpThread(Socket client, MainService ctx) throws IOException {
@@ -337,67 +333,29 @@ public class HttpThread implements Runnable {
 						}
 						case ASKME: {
 							if (filename.startsWith("/askpermission")) {
-								premissiond = false;
-								final Object lock = new Object();
-								ctx.handler.post(new Runnable() {
-									@Override
-									public void run() {
-										try {
-											AlertDialog.Builder ab = new AlertDialog.Builder(ctx);
-											ab.setCancelable(false);
-											ab.setTitle("FileShare");
-											ab.setMessage("下列用户请求您的权限来访问您的文件\nip地址:" + client.getInetAddress().toString());
-											ab.setPositiveButton("授权", new DialogInterface.OnClickListener() {
-
-												@Override
-												public void onClick(DialogInterface p1, int p2) {
-													premissiond = true;
-													synchronized (lock) {
-														lock.notify();
-													}
-												}
-											});
-											ab.setNegativeButton("拒绝", new DialogInterface.OnClickListener() {
-
-												@Override
-												public void onClick(DialogInterface p1, int p2) {
-													premissiond = false;
-													synchronized (lock) {
-														lock.notify();
-													}
-												}
-											});
-											ab.setNeutralButton("拒绝并关闭服务器", new DialogInterface.OnClickListener() {
-												@Override
-												public void onClick(DialogInterface dialogInterface, int i) {
-													premissiond = false;
-													synchronized (lock) {
-														lock.notify();
-													}
-													ctx.stopSelf();
-												}
-											});
-											AlertDialog dlg = ab.create();
-											dlg.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-											dlg.show();
-										} catch (Exception e) {
-											e.printStackTrace();
-											premissiond = false;
-										}
-									}
-								});
-								synchronized (lock) {
-									lock.wait();
+								PermissionRequestManager.PendingRequest pending = PermissionRequestManager.enqueue(client.getInetAddress().getHostAddress());
+								PermissionRequestManager.Decision decision = pending.awaitDecision(PermissionRequestManager.getDefaultTimeoutMs());
+								if (decision == null) {
+									String timeoutMessage = ctx.getString(R.string.permission_prompt_timeout_message);
+									PermissionRequestManager.resolve(pending.getId(), PermissionRequestManager.Decision.denied(timeoutMessage, false));
+									decision = PermissionRequestManager.Decision.denied(timeoutMessage, false);
 								}
 								String content;
 								String retHead = "HTTP/1.0 200 OK \r\n" +
-										"Content-Type: text/html; charset=UTF-8\r\n";
-								if (premissiond) {
+									"Content-Type: text/html; charset=UTF-8\r\n";
+								if (decision.isGranted()) {
 									content = new JSONObject().put("status", 0).toString();
 									String token = new Session(ctx).getToken();
 									retHead = retHead + "Set-Cookie: token=" + token + "; Path=/;\r\n";
 								} else {
-									content = new JSONObject().put("status", 1).put("message", "请求被拒").toString();
+									String message = decision.getMessage();
+									if (message == null || message.isEmpty()) {
+										message = ctx.getString(R.string.permission_prompt_denied_message);
+									}
+									content = new JSONObject().put("status", 1).put("message", message).toString();
+									if (decision.shouldStopService()) {
+										ctx.stopSelf();
+									}
 								}
 								retHead = retHead + "Content-Length: " + content.getBytes("utf-8").length + "\r\n\r\n";
 								sos.write(retHead.getBytes("utf-8"));

@@ -1,223 +1,169 @@
 package net.newlydev.fileshare_android.fragments;
-import android.content.*;
-import android.graphics.*;
-import android.os.*;
 
-import androidx.appcompat.app.*;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.preference.*;
-import android.view.*;
-import android.view.View.*;
-import android.widget.*;
-import com.google.zxing.*;
-import com.google.zxing.common.*;
-import com.google.zxing.qrcode.*;
-import java.util.*;
-import net.newlydev.fileshare_android.*;
-import net.newlydev.fileshare_android.activities.*;
-
-import net.newlydev.fileshare_android.R;
-
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 
-public class MainFragment extends Fragment
-{
-	SwitchCompat switch_ss;
-	private MyConnection conn;
-	private TextView ip_tv;
-	private ImageView QRCode;
-	private void update_status()
-	{
-		if (Utils.isMainServiceRunning(getActivity()))
-		{
-			switch_ss.setChecked(true);
-			getActivity().bindService(new Intent(getActivity(), MainService.class), conn, Context.BIND_AUTO_CREATE);
-		}
-		else
-		{
-			switch_ss.setChecked(false);
-		}
-	}
-	private void refreshQR()
-	{
-		new Handler().postDelayed(new Runnable(){
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 
-				@Override
-				public void run()
-				{
-					if (Utils.isMainServiceRunning(getActivity()))
-					{
-						String ip=Utils.getLocalIpAddress();
-						if (ip.equals("0"))
-						{
-							ip_tv.setText(getString(R.string.no_internet));
-							QRCode.setVisibility(View.GONE);
-						}
-						else
-						{
-							String url="http://" + ip + ":" + PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("serverPort", "-1");
-							ip_tv.setText(String.format(getString(R.string.server_started),url));
-							Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
-							hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
-							//图像数据转换，使用了矩阵转换
-							try
-							{
-								BitMatrix bitMatrix = new QRCodeWriter().encode(url, BarcodeFormat.QR_CODE, QRCode.getWidth(), QRCode.getHeight(), hints);
-								int[] pixels = new int[QRCode.getWidth() * QRCode.getHeight()];
-								//下面这里按照二维码的算法，逐个生成二维码的图片，
-								//两个for循环是图片横列扫描的结果
-								for (int y = 0; y < QRCode.getHeight(); y++)
-								{
-									for (int x = 0; x < QRCode.getWidth(); x++)
-									{
-										if (bitMatrix.get(x, y))
-										{
-											pixels[y * QRCode.getWidth() + x] = 0xff000000;
-										}
-										else
-										{
-											pixels[y * QRCode.getWidth() + x] = 0xffffffff;
-										}
-									}
-								}
-								//生成二维码图片的格式，使用ARGB_8888
-								Bitmap bitmap = Bitmap.createBitmap(QRCode.getWidth(), QRCode.getHeight(), Bitmap.Config.ARGB_8888);
-								bitmap.setPixels(pixels, 0, QRCode.getWidth(), 0, 0, QRCode.getWidth(), QRCode.getHeight());
-								QRCode.setImageBitmap(bitmap);
-								QRCode.setVisibility(View.VISIBLE);
-							}
-							catch (Exception e)
-							{
-								e.printStackTrace();
-								ip_tv.setText(String.format(getString(R.string.genqr_fail),url));
-							}
-						}
-					}
-					else
-					{
-						ip_tv.setText(getText(R.string.server_stopped));
-						QRCode.setVisibility(View.GONE);
-					}
-				}
-			}, 100);
+import net.newlydev.fileshare_android.MainService;
+import net.newlydev.fileshare_android.R;
+import net.newlydev.fileshare_android.ServiceStatusTracker;
+import net.newlydev.fileshare_android.Utils;
 
-	}
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-	{
-		View rootview=inflater.inflate(R.layout.fragment_main, container, false);
-		ip_tv = rootview.findViewById(R.id.fragment_main_ip_textview);
-		QRCode = rootview.findViewById(R.id.fragment_main_qrcode_imageview);
-		ip_tv.setOnClickListener(new OnClickListener(){
+import java.util.Hashtable;
 
-				@Override
-				public void onClick(View p1)
-				{
-					refreshQR();
-				}
-			});
-		switch_ss = rootview.findViewById(R.id.fragment_status_switch);
-		update_status();
-		switch_ss.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+public class MainFragment extends Fragment {
 
-				@Override
-				public void onCheckedChanged(CompoundButton p1, boolean p2)
-				{
-					if (!p1.isPressed())
-					{
-						return;
-					}
-					Intent intent = new Intent(getActivity(), MainService.class);
-					if (p2)
-					{
-						getActivity().startService(intent);
-						((MainActivity)getActivity()).waiting = true;
-						((MainActivity)getActivity()).lv.setEnabled(false);
-						((MainActivity)getActivity()).pb.setVisibility(View.VISIBLE);
-						switch_ss.setEnabled(false);
-					}
-					else
-					{
-						getActivity().unbindService(conn);
-						getActivity().stopService(intent);
-					}
-					update_status();
-					refreshQR();
-				}
-			});
+    private SwitchCompat switchToggle;
+    private TextView ipTextView;
+    private ImageView qrCodeView;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        ipTextView = rootView.findViewById(R.id.fragment_main_ip_textview);
+        qrCodeView = rootView.findViewById(R.id.fragment_main_qrcode_imageview);
+        switchToggle = rootView.findViewById(R.id.fragment_status_switch);
 
-		return rootview;
-		//return super.onCreateView(inflater,container,savedInstanceState);
-	}
+        ipTextView.setOnClickListener(v -> refreshQrForStatus(ServiceStatusTracker.getCurrentStatus()));
+        switchToggle.setOnCheckedChangeListener(this::onSwitchToggled);
+        return rootView;
+    }
 
-	@Override
-	public void onResume()
-	{
-		super.onResume();
-		update_status();
-		refreshQR();
-	}
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ServiceStatusTracker.getStatus().observe(getViewLifecycleOwner(), status -> {
+            renderSwitchForStatus(status);
+            refreshQrForStatus(status);
+        });
+        ServiceStatusTracker.getErrors().observe(getViewLifecycleOwner(), error -> {
+            if (!TextUtils.isEmpty(error) && isAdded()) {
+                new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.server_start_failed)
+                    .setMessage(error)
+                    .setPositiveButton(android.R.string.ok, null)
+                    .setCancelable(false)
+                    .show();
+                ServiceStatusTracker.clearError();
+            }
+        });
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState)
-	{
-		super.onCreate(savedInstanceState);
-		conn = new MyConnection();
-	}
-	private class MyConnection implements ServiceConnection
-	{
+    private void onSwitchToggled(CompoundButton button, boolean shouldEnable) {
+        if (!button.isPressed()) {
+            return;
+        }
+        Context context = requireContext();
+        Intent intent = new Intent(context, MainService.class);
+        if (shouldEnable) {
+            ContextCompat.startForegroundService(context, intent);
+        } else {
+            context.stopService(intent);
+        }
+    }
 
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder binder)
-		{
-			final MainService.mBinder service = (MainService.mBinder) binder;
-			if (!service.service.started)
-			{
-				new Handler().postDelayed(new Runnable(){
+    private void renderSwitchForStatus(ServiceStatusTracker.Status status) {
+        boolean serviceActive = status != ServiceStatusTracker.Status.STOPPED;
+        if (switchToggle.isChecked() != serviceActive) {
+            switchToggle.setChecked(serviceActive);
+        }
+        switchToggle.setEnabled(status != ServiceStatusTracker.Status.STARTING);
+    }
 
-						@Override
-						public void run()
-						{
-							String err=service.service.getError();
-							if (!err.equals(""))
-							{
-								if (Utils.isMainServiceRunning(getActivity()))
-								{
-									getActivity().unbindService(conn);
-									Intent intent = new Intent(getActivity(), MainService.class);
-									getActivity().stopService(intent);
-									new AlertDialog.Builder(getActivity()).setTitle("服务器启动失败").setMessage(err).setPositiveButton("确定", null).setCancelable(false).show();
-								}
-								//Toast.makeText(getActivity(),err,Toast.LENGTH_SHORT).show();
-							}
-							((MainActivity)getActivity()).waiting = false;
-							((MainActivity)getActivity()).pb.setVisibility(View.GONE);
-							((MainActivity)getActivity()).lv.setEnabled(true);
-							switch_ss.setEnabled(true);
-							update_status();
-						}
-					}, 500);
-				service.service.started = true;
-			}
+    private void refreshQrForStatus(ServiceStatusTracker.Status status) {
+        if (status != ServiceStatusTracker.Status.RUNNING) {
+            int message = status == ServiceStatusTracker.Status.STARTING ? R.string.server_starting : R.string.server_stopped;
+            ipTextView.setText(message);
+            qrCodeView.setVisibility(View.GONE);
+            return;
+        }
+        mainHandler.postDelayed(() -> {
+            if (!isAdded()) {
+                return;
+            }
+            String ip = Utils.getLocalIpAddress();
+            if ("0".equals(ip)) {
+                ipTextView.setText(getString(R.string.no_internet));
+                qrCodeView.setVisibility(View.GONE);
+                return;
+            }
+            String port = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext()).getString("serverPort", "-1");
+            String url = "http://" + ip + ":" + port;
+            ipTextView.setText(getString(R.string.server_started, url));
+            showQrOnceLaidOut(url);
+        }, 100);
+    }
 
-		}
+    private void showQrOnceLaidOut(String url) {
+        qrCodeView.setVisibility(View.VISIBLE);
+        if (qrCodeView.getWidth() > 0 && qrCodeView.getHeight() > 0) {
+            renderQr(url);
+            return;
+        }
+        qrCodeView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                if (qrCodeView.getWidth() > 0 && qrCodeView.getHeight() > 0) {
+                    qrCodeView.removeOnLayoutChangeListener(this);
+                    renderQr(url);
+                }
+            }
+        });
+    }
 
-		@Override
-		public void onServiceDisconnected(ComponentName name)
-		{
+    private void renderQr(String url) {
+        try {
+            qrCodeView.setImageBitmap(createQrBitmap(url));
+        } catch (Exception e) {
+            ipTextView.setText(getString(R.string.genqr_fail, url));
+            qrCodeView.setVisibility(View.GONE);
+        }
+    }
 
-		}
-	}
+    private Bitmap createQrBitmap(String payload) throws Exception {
+        Hashtable<EncodeHintType, String> hints = new Hashtable<>();
+        hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
+        int width = qrCodeView.getWidth();
+        int height = qrCodeView.getHeight();
+        BitMatrix bitMatrix = new QRCodeWriter().encode(payload, BarcodeFormat.QR_CODE, width, height, hints);
+        int[] pixels = new int[width * height];
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                pixels[y * width + x] = bitMatrix.get(x, y) ? 0xff000000 : 0xffffffff;
+            }
+        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+        return bitmap;
+    }
 
-	@Override
-	public void onDestroy()
-	{
-		super.onDestroy();
-		if (Utils.isMainServiceRunning(getActivity()))
-		{
-			getActivity().unbindService(conn);
-		}
-	}
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mainHandler.removeCallbacksAndMessages(null);
+    }
 }

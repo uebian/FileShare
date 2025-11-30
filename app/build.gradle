@@ -29,5 +29,6 @@ dependencies {
     implementation libs.material
     implementation libs.play.services.ads
     implementation libs.preference
+    implementation libs.lifecycle.service
     implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
 }

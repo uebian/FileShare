@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
 		<item name="colorAccent">@color/accent</item>
 		<!--<item name="actionMenuTextColor">#ffffff</item>-->
 		<item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
 		<item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
+		<item name="android:statusBarColor">@color/primary_dark</item>
+		<item name="android:navigationBarColor">?attr/colorSurface</item>
     </style>
 	<style name="mToolBar">
-        <item name="colorControlNormal">#ffffff</item>
+        <item name="colorControlNormal">?attr/colorOnPrimary</item>
+		<item name="android:titleTextColor">?attr/colorOnPrimary</item>
 	</style>
 	<style name="DrawerArrowStyle" parent="@style/Widget.AppCompat.DrawerArrowToggle">
         <item name="spinBars">true</item>
-        <item name="color">#ffffff</item>
+        <item name="color">?attr/colorOnPrimary</item>
     </style>
-	<color name="primary">#3f51b5</color>
-	<color name="primary_dark">#303f9f</color>
-	<color name="accent">#ff6e40</color>
 </resources>

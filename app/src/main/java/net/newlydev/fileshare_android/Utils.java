@@ -108,13 +108,7 @@ public class Utils
 		return contentType == null?"*/*":contentType; //当找不到的时候就会返回空
 	}
 	public static boolean isMainServiceRunning(Context context) {
-	    ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-	    for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	        if ("net.newlydev.fileshare_android.MainService".equals(service.service.getClassName())) {
-	            return true;
-	        }
-	    }
-	    return false;
+		return ServiceStatusTracker.isRunning();
 	}
 	
 	public static String EncoderByMd5(String buf) {

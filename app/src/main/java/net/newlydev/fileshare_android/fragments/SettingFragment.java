@@ -4,10 +4,7 @@ import android.content.*;
 import androidx.appcompat.app.*;
 import androidx.preference.*;
 
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.widget.*;
 import net.newlydev.fileshare_android.*;
 
@@ -127,14 +124,6 @@ public class SettingFragment extends PreferenceFragmentCompat
 				{
 					if(p2.equals("askme"))
 					{
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&!Settings.canDrawOverlays(getActivity()))
-						{
-							Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-							intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
-							startActivityForResult(intent, 100);
-							Toast.makeText(getActivity(), "向您显示信息需要开启悬浮窗权限", Toast.LENGTH_SHORT).show();
-							return false;
-						}
 						pwd.setEnabled(false);
 					}else if(p2.equals("passwd"))
 					{
